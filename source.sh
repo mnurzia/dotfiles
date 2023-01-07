@@ -9,3 +9,7 @@ alias ls="ls --color=auto"
 alias l="ls"
 alias ll="ls -l"
 alias up="cd .."
+alias colors=~/.config/dotfiles/bin/colors
+
+HISTSIZE=-1
+HISTFILESIZE=-1
