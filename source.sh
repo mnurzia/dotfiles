@@ -13,3 +13,4 @@ alias colors=~/.config/dotfiles/bin/colors
 
 HISTSIZE=-1
 HISTFILESIZE=-1
+INPUTRC=~/.config/dotfiles/inputrc
