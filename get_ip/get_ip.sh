@@ -1,3 +1,3 @@
 #!/bin/sh
 
-curl -s http://checkip.amazonaws.com/
+curl -s4 www.icanhazip.com

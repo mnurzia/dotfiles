@@ -1,4 +1,4 @@
-all: bin bin/prompt bin/colors bin/get_ip
+all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6
 
 bin:
 	mkdir -p bin
@@ -13,6 +13,10 @@ bin/colors: colors/colors.py
 bin/get_ip: get_ip/get_ip.sh
 	cp get_ip/get_ip.sh bin/get_ip
 	chmod +x bin/get_ip
+
+bin/get_ip6: get_ip6/get_ip6.sh
+	cp get_ip6/get_ip6.sh bin/get_ip6
+	chmod +x bin/get_ip6
 
 clean:
 	rm -rf bin
