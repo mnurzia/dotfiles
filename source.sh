@@ -22,9 +22,14 @@ alias gs="git status"
 
 # custom binaries
 PATH="$PATH:~/.config/dotfiles/bin"
-alias colors=~/.config/dotfiles/bin/colors
 
-set EDITOR=nano
+# editor modifications
+export EDITOR=nano
+export GIT_EDITOR=nano
+
+# make history infinite
 HISTSIZE=-1
 HISTFILESIZE=-1
-INPUTRC=~/.config/dotfiles/inputrc
+
+# inputrc modifications
+export INPUTRC=~/.config/dotfiles/inputrc
