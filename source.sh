@@ -26,6 +26,7 @@ PATH="$PATH:~/.config/dotfiles/bin"
 # editor modifications
 export EDITOR=nano
 export GIT_EDITOR=nano
+alias vsc=code
 
 # make history infinite
 HISTSIZE=-1
