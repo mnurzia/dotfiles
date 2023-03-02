@@ -7,12 +7,14 @@ _prompt() {
 
 # misc aliases
 alias ghostscript="/usr/bin/env gs"
+alias cls="clear"
 
 # ls aliases
 alias ls="ls --color=auto"
 alias l="ls"
 alias ll="ls -l"
 alias up="cd .."
+alias la="ls -a"
 
 # git aliases
 alias gp="git push"
