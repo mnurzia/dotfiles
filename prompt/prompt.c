@@ -68,6 +68,9 @@ void print_wd() {
   char *buf = malloc(PATH_MAX);
   char *home = getenv("HOME");
   char *wd = getcwd(buf, PATH_MAX);
+  if (!wd) {
+    wd = "<unlinked>";
+  }
   printf(" ");
   if (strncmp(home, wd, strlen(home)) == 0) {
     printf("~");
