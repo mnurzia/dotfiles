@@ -211,7 +211,7 @@ print_git_branch(int short_fmt)
     if (nl) {
       *nl = '\0';
     }
-    seg(0, 111);
+    seg(0, 253);
     if (!short_fmt) {
       if (git_rank > 1) {
         printf(" \ue725 [%i] %s ", git_rank, print_from);
