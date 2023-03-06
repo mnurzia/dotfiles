@@ -8,11 +8,13 @@ _prompt() {
 # misc aliases
 alias ghostscript="/usr/bin/env gs"
 alias cls="clear"
+alias reload="source ~/.config/dotfiles/source.sh"
 
 # ls aliases
 alias ls="ls --color=auto"
 alias l="ls"
 alias ll="ls -l"
+alias lal="ls -al"
 alias up="cd .."
 alias la="ls -a"
 
@@ -37,3 +39,6 @@ HISTFILESIZE=-1
 
 # inputrc modifications
 export INPUTRC=~/.config/dotfiles/inputrc
+
+# signifies correct loading
+fetch

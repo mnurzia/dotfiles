@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #define SEG_SEP "\xee\x82\xb0"
+#define SEG_SEP_MINOR "\xee\x82\xb1"
 
 int last_seg_bg = -1;
 
@@ -34,6 +35,12 @@ put_sep(void)
 }
 
 void
+put_sep_minor(void)
+{
+  printf(SEG_SEP_MINOR);
+}
+
+void
 clear(void)
 {
   printf("\\[\x1b[0m\\]");
@@ -53,6 +60,19 @@ seg(int fg, int bg)
     put_fg(last_seg_bg);
     put_bg(bg);
     put_sep();
+  }
+  put_fg(fg);
+  put_bg(bg);
+  last_seg_bg = bg;
+}
+
+void
+seg_minor(int fg, int bg, int seg_col)
+{
+  if (last_seg_bg != -1) {
+    put_fg(seg_col);
+    put_bg(bg);
+    put_sep_minor();
   }
   put_fg(fg);
   put_bg(bg);
@@ -211,7 +231,7 @@ print_git_branch(int short_fmt)
     if (nl) {
       *nl = '\0';
     }
-    seg(0, 252);
+    seg_minor(15, 234, 239);
     if (!short_fmt) {
       if (git_rank > 1) {
         printf(" \ue725 [%i] %s ", git_rank, print_from);
