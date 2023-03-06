@@ -19,6 +19,10 @@ main()
   strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", tmp);
   char* shell = getenv("SHELL");
   shell = shell ? strrchr(shell, '/') + 1 : "<no shell>";
-  printf("%s \ue0b1 %s \ue0b1 %s\n", timestr, shell, tty_name);
+  printf("\x1b[48;5;236m %s \ue0b1 %s \ue0b1 %s "
+         "\x1b[0m\x1b[38;5;236m\ue0b0\x1b[0m\n",
+         timestr,
+         shell,
+         tty_name);
   return 0;
 }
