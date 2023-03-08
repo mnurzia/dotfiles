@@ -232,14 +232,13 @@ print_git_branch(int short_fmt)
       *nl = '\0';
     }
     seg_minor(15, 234, 239);
-    if (!short_fmt) {
-      if (git_rank > 1) {
-        printf(" \ue725 [%i] %s ", git_rank, print_from);
-      } else {
-        printf(" \ue725 %s ", print_from);
-      }
+    if (git_rank > 1) {
+      printf(" %i\ue725 ", git_rank);
     } else {
       printf(" \ue725 ");
+    }
+    if (!short_fmt) {
+      printf("%s ", print_from);
     }
   }
 }

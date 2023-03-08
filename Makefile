@@ -1,6 +1,6 @@
 CC=gcc
 
-all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch ~/.vimrc
+all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii ~/.vimrc
 
 bin:
 	mkdir -p bin
@@ -22,6 +22,14 @@ bin/get_ip6: get_ip6/get_ip6.sh
 
 bin/fetch: fetch/fetch.c
 	$(CC) fetch/fetch.c -o bin/fetch
+
+bin/name_weight: name_weight/name_weight.py
+	cp name_weight/name_weight.py bin/name_weight
+	chmod +x bin/name_weight
+
+bin/ascii: ascii/ascii.py
+	cp ascii/ascii.py bin/ascii
+	chmod +x bin/ascii
 
 ~/.vimrc:
 	cp vimrc ~/.vimrc
