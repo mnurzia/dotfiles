@@ -35,11 +35,13 @@ CTRLS = [
     "RS",
     "US"
 ]
+print("\x1b[1m " + " | ".join(["DEC OCT HEX CHR"] * 4) + "\x1b[0m")
 for r in range(128 // COLS):
     for c in range(COLS):
         codep = r + c * (128 // COLS)
         pname = CTRLS[codep] if codep < len(
             CTRLS) else "DEL" if codep == 0x7F else chr(codep)
-        print(" %3i %03o 0x%02X %-3s " %
+        print(" %3i %03o %02Xh %-3s " %
               (codep, codep, codep, pname), end="|" if c < COLS - 1 else "")
     print()
+print("\x1b[1m " + " | ".join(["DEC OCT HEX CHR"] * 4) + "\x1b[0m")

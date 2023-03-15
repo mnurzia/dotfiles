@@ -9,6 +9,7 @@ _prompt() {
 alias ghostscript="/usr/bin/env gs"
 alias cls="clear"
 alias reload="source ~/.config/dotfiles/source.sh"
+alias hexdump="hexdump -C"
 
 # ls aliases
 alias ls="ls --color=auto"
