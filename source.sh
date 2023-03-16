@@ -16,8 +16,14 @@ alias ls="ls --color=auto"
 alias l="ls"
 alias ll="ls -l"
 alias lal="ls -al"
-alias up="cd .."
 alias la="ls -a"
+
+# cd aliases
+alias up="cd .."
+recent() {
+  D=`_recent`
+  cd $D
+}
 
 # git aliases
 alias gp="git push"
