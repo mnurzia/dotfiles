@@ -35,9 +35,9 @@ alias gs="git status"
 PATH="$PATH:~/.config/dotfiles/bin"
 
 # editor modifications
-alias nano="vim"
-export EDITOR=vim
-export GIT_EDITOR=vim
+alias nano="nvim"
+export EDITOR=nvim
+export GIT_EDITOR=nvim
 alias vsc=code
 
 # make history infinite

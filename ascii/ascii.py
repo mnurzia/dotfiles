@@ -35,7 +35,7 @@ CTRLS = [
     "RS",
     "US"
 ]
-print("\x1b[1m " + " | ".join(["DEC OCT HEX CHR"] * 4) + "\x1b[0m")
+print(" " + " | ".join(["DEC OCT HEX CHR"] * COLS))
 for r in range(128 // COLS):
     for c in range(COLS):
         codep = r + c * (128 // COLS)
@@ -44,4 +44,4 @@ for r in range(128 // COLS):
         print(" %3i %03o %02Xh %-3s " %
               (codep, codep, codep, pname), end="|" if c < COLS - 1 else "")
     print()
-print("\x1b[1m " + " | ".join(["DEC OCT HEX CHR"] * 4) + "\x1b[0m")
+print(" " + " | ".join(["DEC OCT HEX CHR"] * COLS))

@@ -35,7 +35,7 @@ bin/_recent: recent/recent.py
 	cp recent/recent.py bin/_recent
 	chmod +x bin/_recent
 
-~/.vimrc:
+~/.vimrc: vimrc
 	cp vimrc ~/.vimrc
 
 clean:
