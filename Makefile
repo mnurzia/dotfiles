@@ -1,6 +1,6 @@
 CC=gcc
 
-all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii bin/_recent ~/.vimrc
+all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii bin/_recent ~/.vimrc bin/keyprobe
 
 bin:
 	mkdir -p bin
@@ -30,6 +30,9 @@ bin/name_weight: name_weight/name_weight.py
 bin/ascii: ascii/ascii.py
 	cp ascii/ascii.py bin/ascii
 	chmod +x bin/ascii
+
+bin/keyprobe: keyprobe/keyprobe.c
+	$(CC) keyprobe/keyprobe.c -o bin/keyprobe
 
 bin/_recent: recent/recent.py
 	cp recent/recent.py bin/_recent
