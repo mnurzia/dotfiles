@@ -53,3 +53,19 @@ for i in range(24):
           (i + 232, i + 232), end="\x1b[0m")
 
 print()
+print()
+
+ATTR_ON = [1, 4, 3, 9, 7, 2, 5, 21, 6]
+ATTR_OFF = [22, 24, 23, 29, 27, 22, 25, 28, 25]
+
+for i, on in enumerate(ATTR_ON):
+    print("\x1b[%im%4i\x1b[0m" %
+          (on, on), end="")
+
+print()
+
+for i, on in enumerate(ATTR_OFF):
+    print("\x1b[%im%4i\x1b[0m" %
+          (on, on), end="")
+
+print()
