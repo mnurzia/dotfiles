@@ -15,8 +15,20 @@ noremap <C-End> G$
 inoremap <C-End> <ESC>GA
 
 " Kill line.
-noremap <C-k> Vd
+nnoremap <C-k> Vd
 inoremap <C-k> <ESC>Vdi
+vnoremap <C-k> d
+
+" Kill selection.
+vnoremap <BS> d
+
+" Duplicate line downwards.
+nnoremap <M-S-Down> i<ESC>yyp`^j
+inoremap <M-S-Down> <ESC><M-S-Down>i
+
+" Duplicate line upwards.
+nnoremap <M-S-Up> i<ESC>yyP`^k
+inoremap <M-S-Up> <ESC><M-S-Up>i
 
 " Undo / redo.
 noremap <C-z> u
@@ -39,7 +51,9 @@ nnoremap <LeftMouse> <LeftMouse>i
 vnoremap <LeftMouse> <LeftMouse>i
 
 " Focus NVimTree
-map <C-b> :NvimTreeFocus<CR>
+inoremap <C-b> <ESC>:NvimTreeFocus<CR>
+nnoremap <C-b> :NvimTreeFocus<CR>
+vnoremap <C-b> :NvimTreeFocus<CR>
 
 " Forward word / backward word.
 inoremap <M-f> <S-Right>
@@ -78,19 +92,71 @@ nnoremap <S-Down> vj
 vnoremap <S-Down> j
 
 " Select left pane.
-inoremap <C-!> <ESC>:2 wincmd w<CR>
-nnoremap <C-!> :2 wincmd w<CR>
-vnoremap <C-!> <ESC>:2 wincmd w<CR>
+inoremap <M-!> <ESC>:2 wincmd w<CR>
+nnoremap <M-!> :2 wincmd w<CR>
+vnoremap <M-!> <ESC>:2 wincmd w<CR>
 
 " Select right pane
-inoremap <C-@> <ESC>:3 wincmd w<CR>
-nnoremap <C-@> :3 wincmd w<CR>
-vnoremap <C-@> <ESC>:3 wincmd w<CR>
+inoremap <M-@> <ESC>:3 wincmd w<CR>
+nnoremap <M-@> :3 wincmd w<CR>
+vnoremap <M-@> <ESC>:3 wincmd w<CR>
 
 " Make new windows split vertically right.
-autocmd WinNew * wincmd L
+" autocmd WinNew * wincmd L
 
 " Prevent cursor moving backwards on ESC.
 inoremap <silent> <Esc> <Esc>`^
 
+" Debugging.
+
+" Start/continue
+nnoremap <F5> :lua require'dap'.continue()<CR>
+inoremap <F5> <ESC>:lua require'dap'.continue()<CR>
+
+" Stop (F17 = S-F5)
+nnoremap <F17> :OverseerRun build<CR>:lua require'dap'.close(); require'dapui'.close()<CR>:NvimTreeResize 30<CR>
+inoremap <F17> <ESC>:OverseerRun build<CR>:lua require'dap'.close(); require'dapui'.close()<CR>:NvimTreeResize 30<CR>
+
+" Step over (next)
+nnoremap <F10> :lua require'dap'.step_over()<CR>
+inoremap <F10> <ESC>:lua require'dap'.step_over()<CR>
+
+" Step into
+nnoremap <F11> :lua require'dap'.step_into()<CR>
+inoremap <F11> <ESC>:lua require'dap'.step_into()<CR>
+
+" Step out (F23 = S-F11)
+nnoremap <F23> :lua require'dap'.step_out()<CR>
+inoremap <F23> <ESC>:lua require'dap'.step_out()<CR>
+
+" Stack up
+nnoremap <F9> :lua require'dap'.up()<CR>
+inoremap <F9> <ESC>:lua require'dap'.up()<CR>
+
+" Stack down (F21 = S-F9)
+nnoremap <F21> :lua require'dap'.down()<CR>
+inoremap <F21> <ESC>:lua require'dap'.down()<CR>
+
+" Togg breakpoint
+nnoremap <F8> :DapToggleBreakpoint<CR>
+inoremap <F8> <ESC>:DapToggleBreakpoint<CR>i
+
 set autoindent
+" set colorcolumn=80
+set splitright
+
+" Show stuff in window title.
+set title
+
+" Highlight current line.
+set cursorline
+
+" Format.
+nnoremap <M-F> :Format<CR>
+inoremap <M-F> <ESC>:Format<CR>i
+vnoremap <M-F> :Format<CR>
+
+" Save.
+nnoremap <M-C-S> :w<CR>
+inoremap <M-C-S> <ESC>:w<CR>i
+vnoremap <M-C-S> :w<CR>

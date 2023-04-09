@@ -39,7 +39,7 @@ bin/_recent: recent/recent.py
 	chmod +x bin/_recent
 
 ~/.vimrc: vimrc
-	cp vimrc ~/.vimrc
+	ln -s ~/.config/dotfiles/vimrc ~/.vimrc
 
 clean:
 	rm -rf bin

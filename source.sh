@@ -10,6 +10,7 @@ alias ghostscript="/usr/bin/env gs"
 alias cls="clear"
 alias reload="source ~/.config/dotfiles/source.sh"
 alias hexdump="hexdump -C"
+alias remake="make -C ~/.config/dotfiles; reload"
 
 # ls aliases
 alias ls="ls --color=auto"
