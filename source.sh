@@ -12,6 +12,10 @@ alias reload="source ~/.config/dotfiles/source.sh"
 alias hexdump="hexdump -C"
 alias remake="make -C ~/.config/dotfiles; reload"
 
+_reap() {
+  kill -9 `jobs -ps`
+}
+
 # ls aliases
 alias ls="ls --color=auto"
 alias l="ls"

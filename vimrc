@@ -24,11 +24,11 @@ vnoremap <BS> d
 
 " Duplicate line downwards.
 nnoremap <M-S-Down> i<ESC>yyp`^j
-inoremap <M-S-Down> <ESC><M-S-Down>i
+inoremap <M-S-Down> <ESC>i<ESC>yyp`^ji
 
 " Duplicate line upwards.
 nnoremap <M-S-Up> i<ESC>yyP`^k
-inoremap <M-S-Up> <ESC><M-S-Up>i
+inoremap <M-S-Up> <ESC>i<ESC>yyP`^ki
 
 " Undo / redo.
 noremap <C-z> u
@@ -141,7 +141,7 @@ inoremap <F21> <ESC>:lua require'dap'.down()<CR>
 nnoremap <F8> :DapToggleBreakpoint<CR>
 inoremap <F8> <ESC>:DapToggleBreakpoint<CR>i
 
-set autoindent
+set autoindent expandtab tabstop=2 shiftwidth=2
 " set colorcolumn=80
 set splitright
 
