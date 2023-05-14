@@ -40,9 +40,12 @@ alias gs="git status"
 PATH="$PATH:~/.config/dotfiles/bin"
 
 # editor modifications
-alias nano="nvim"
-export EDITOR=nvim
-export GIT_EDITOR=nvim
+if !command -v nvim &> /dev/null
+then
+  alias nano="nvim"
+  export EDITOR=nvim
+  export GIT_EDITOR=nvim
+fi
 alias vsc=code
 
 # make history infinite
