@@ -2,6 +2,7 @@
 
 PROMPT_COMMAND=_prompt
 _prompt() {
+  history -a
   PS1="$(~/.config/dotfiles/bin/prompt $?)"
 }
 
@@ -9,7 +10,7 @@ _prompt() {
 alias ghostscript="/usr/bin/env gs"
 alias cls="clear"
 alias reload="source ~/.config/dotfiles/source.sh"
-alias hexdump="hexdump -C"
+alias hexdump="hexdump"
 alias remake="make -C ~/.config/dotfiles; reload"
 
 _reap() {
@@ -40,7 +41,7 @@ alias gs="git status"
 PATH="$PATH:~/.config/dotfiles/bin"
 
 # editor modifications
-if !command -v nvim &> /dev/null
+if command -v nvim > /dev/null 2>&1
 then
   alias nano="nvim"
   export EDITOR=nvim
@@ -54,6 +55,12 @@ HISTFILESIZE=-1
 
 # inputrc modifications
 export INPUTRC=~/.config/dotfiles/inputrc
+
+# pass mods
+export PASSWORD_STORE_ENABLE_EXTENSIONS=true
+passshow() {
+  pass show $(find ~/.password-store -name '*.gpg' | sed -e "s:/Users/maxnu/.password-store/::gi" -e "s:.gpg$::gi" | fzf)
+}
 
 # signifies correct loading
 fetch
