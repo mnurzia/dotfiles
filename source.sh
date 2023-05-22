@@ -12,6 +12,7 @@ alias cls="clear"
 alias reload="source ~/.config/dotfiles/source.sh"
 alias hexdump="hexdump"
 alias remake="make -C ~/.config/dotfiles; reload"
+alias ssu="sudo su -"
 
 _reap() {
   kill -9 `jobs -ps`
