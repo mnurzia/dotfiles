@@ -1,6 +1,6 @@
 CC=gcc
 
-all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii bin/_recent ~/.vimrc bin/keyprobe
+all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii bin/_recent ~/.vimrc bin/keyprobe ~/.config/nvim
 
 bin:
 	mkdir -p bin
@@ -41,6 +41,10 @@ bin/_recent: recent/recent.py
 ~/.vimrc: vimrc
 	ln -s ~/.config/dotfiles/vimrc ~/.vimrc
 
+~/.config/nvim:
+	ln -s ~/.config/dotfiles/nvim ~/.config/nvim
+
 clean:
 	rm -rf bin
 	rm -rf ~/.vimrc
+	rm -rf ~/.config/nvim
