@@ -63,5 +63,8 @@ passshow() {
   pass show $(find ~/.password-store -name '*.gpg' | sed -e "s:/Users/maxnu/.password-store/::gi" -e "s:.gpg$::gi" | fzf)
 }
 
+# git setup
+git config --global user.email "7797957+mnurzia@users.noreply.github.com"
+
 # signifies correct loading
 fetch

@@ -1,0 +1,8 @@
+CompileFlags:
+  Add: [-Wall, -Werror, -Wextra, -pedantic, -std=c89]
+InlayHints:
+  Enabled: false
+Diagnostics:
+  UnusedIncludes: Strict
+  ClangTidy:
+    Add: linuxkernel-*

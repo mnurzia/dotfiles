@@ -1,6 +1,6 @@
 CC=gcc
 
-all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii bin/_recent ~/.vimrc bin/keyprobe ~/.config/nvim
+all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii bin/_recent bin/bviz ~/.vimrc bin/keyprobe ~/.config/nvim
 
 bin:
 	mkdir -p bin
@@ -37,6 +37,9 @@ bin/keyprobe: keyprobe/keyprobe.c
 bin/_recent: recent/recent.py
 	cp recent/recent.py bin/_recent
 	chmod +x bin/_recent
+
+bin/bviz: bviz/bviz.c
+	$(CC) bviz/bviz.c -o bin/bviz
 
 ~/.vimrc: vimrc
 	ln -s ~/.config/dotfiles/vimrc ~/.vimrc
