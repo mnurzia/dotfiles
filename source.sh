@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROMPT_COMMAND=_prompt
-_prompt() {
+_prompt () {
   history -a
   PS1="$(~/.config/dotfiles/bin/prompt $?)"
 }
@@ -27,9 +27,14 @@ alias la="ls -a"
 
 # cd aliases
 alias up="cd .."
-recent() {
-  D=`_recent`
-  cd $D
+
+_recent () {
+  cd $(ls -1t | head -n1);
+}
+alias recent=_recent
+
+randport () {
+  shuf -i 1024-49151 | head -n1
 }
 
 # git aliases
@@ -59,7 +64,7 @@ export INPUTRC=~/.config/dotfiles/inputrc
 
 # pass mods
 export PASSWORD_STORE_ENABLE_EXTENSIONS=true
-passshow() {
+passhow() {
   pass show $(find ~/.password-store -name '*.gpg' | sed -e "s:/Users/maxnu/.password-store/::gi" -e "s:.gpg$::gi" | fzf)
 }
 
