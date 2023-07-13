@@ -8,9 +8,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define SEG_SEP "\xee\x82\xb0"
+#define SEG_SEP       "\xee\x82\xb0"
 #define SEG_SEP_MINOR "\xee\x82\xb1"
-#define BRANCH_ICON "\xee\x9c\xa5"
+#define BRANCH_ICON   "\xee\x9c\xa5"
 
 int last_seg_bg = -1;
 
@@ -30,7 +30,8 @@ void clear(void) { printf("\\[\x1b[0m\\]"); }
 void seg_begin(void) { clear(); }
 
 /* Output segment with foreground and background. */
-void seg(int fg, int bg) {
+void seg(int fg, int bg)
+{
   if (last_seg_bg != -1) {
     put_fg(last_seg_bg);
     put_bg(bg);
@@ -41,7 +42,8 @@ void seg(int fg, int bg) {
   last_seg_bg = bg;
 }
 
-void seg_minor(int fg, int bg, int seg_col) {
+void seg_minor(int fg, int bg, int seg_col)
+{
   if (last_seg_bg != -1) {
     put_fg(seg_col);
     put_bg(bg);
@@ -52,7 +54,8 @@ void seg_minor(int fg, int bg, int seg_col) {
   last_seg_bg = bg;
 }
 
-void seg_end(void) {
+void seg_end(void)
+{
   clear();
   put_fg(last_seg_bg);
   put_sep();
@@ -61,18 +64,19 @@ void seg_end(void) {
   fflush(stdout);
 }
 
-void print_login_hostname(void) {
-  char *buf;
-  char *buf2;
+void print_login_hostname(void)
+{
+  char* buf;
+  char* buf2;
   struct passwd pwd;
-  struct passwd *out;
+  struct passwd* out;
   buf = malloc(80);
   buf2 = malloc(160);
   *buf = '\0';
   getpwuid_r(getuid(), &pwd, buf2, 160, &out);
   gethostname(buf, 80);
   {
-    char *c = buf;
+    char* c = buf;
     while (*c) {
       if (*c == '.') {
         *c = '\0';
@@ -85,11 +89,12 @@ void print_login_hostname(void) {
   free(buf2);
 }
 
-void print_wd(int short_fmt) {
-  char *buf = malloc(PATH_MAX);
-  char *home = getenv("HOME");
-  char *wd = getcwd(buf, PATH_MAX);
-  char *obuf = malloc(PATH_MAX);
+void print_wd(int short_fmt)
+{
+  char* buf = malloc(PATH_MAX);
+  char* home = getenv("HOME");
+  char* wd = getcwd(buf, PATH_MAX);
+  char* obuf = malloc(PATH_MAX);
   *obuf = '\0';
   if (!wd) {
     wd = "<unlinked>";
@@ -104,7 +109,7 @@ void print_wd(int short_fmt) {
   if (!short_fmt) {
     printf(" %s ", obuf);
   } else {
-    char *last_slash = strrchr(obuf, '/');
+    char* last_slash = strrchr(obuf, '/');
     if (!last_slash) {
       printf(" %s ", obuf);
     } else if (last_slash == obuf && !*(last_slash + 1)) {
@@ -118,8 +123,9 @@ void print_wd(int short_fmt) {
 
 void print_exit(int exit_code) { printf(" %i ", exit_code); }
 
-void seg_user_color(void) {
-  char *color = getenv("PROMPT_USER_COLORS");
+void seg_user_color(void)
+{
+  char* color = getenv("PROMPT_USER_COLORS");
   int fg, bg;
   if (getuid() == 0) {
     fg = 15;
@@ -133,7 +139,8 @@ void seg_user_color(void) {
   seg(fg, bg);
 }
 
-void print_hash(void) {
+void print_hash(void)
+{
   if (getuid() == 0) {
     printf(" # ");
   } else {
@@ -141,10 +148,38 @@ void print_hash(void) {
   }
 }
 
-void print_git_branch(int short_fmt) {
-  char *wd_buf = malloc(PATH_MAX);
-  char *git_buf = malloc(PATH_MAX);
-  char *wd = getcwd(wd_buf, PATH_MAX);
+void print_msystem(void)
+{
+  char* msystem = getenv("MSYSTEM");
+  char* short_msystem = NULL;
+  if (!msystem)
+    return;
+  if (!strcmp(msystem, "CLANG32"))
+    short_msystem = "C32";
+  else if (!strcmp(msystem, "CLANG64"))
+    short_msystem = "C64";
+  else if (!strcmp(msystem, "CLANGARM64"))
+    short_msystem = "CA64";
+  else if (!strcmp(msystem, "MINGW32"))
+    short_msystem = "M32";
+  else if (!strcmp(msystem, "MINGW64"))
+    short_msystem = "M64";
+  else if (!strcmp(msystem, "MSYS")) {
+  } else if (!strcmp(msystem, "UCRT64"))
+    short_msystem = "U64";
+  else
+    short_msystem = "*";
+  if (!short_msystem)
+    return;
+  seg(15, 234);
+  printf(" %s ", short_msystem);
+}
+
+void print_git_branch(int short_fmt)
+{
+  char* wd_buf = malloc(PATH_MAX);
+  char* git_buf = malloc(PATH_MAX);
+  char* wd = getcwd(wd_buf, PATH_MAX);
   int git_rank = 0;
   char head_buf[256] = "";
   /* suffix with / to normalize loop */
@@ -177,9 +212,9 @@ void print_git_branch(int short_fmt) {
     } while (*wd && *wd != '/');
   }
   if (head_buf[0]) {
-    char *last_slash = strrchr(head_buf, '/');
-    char *print_from = head_buf;
-    char *nl = strchr(head_buf, '\n');
+    char* last_slash = strrchr(head_buf, '/');
+    char* print_from = head_buf;
+    char* nl = strchr(head_buf, '\n');
     if (last_slash) {
       print_from = last_slash + 1;
     }
@@ -193,12 +228,18 @@ void print_git_branch(int short_fmt) {
       printf(" " BRANCH_ICON " ");
     }
     if (!short_fmt) {
+      if (strlen(print_from) >= 16) {
+        /* trim branch if too long */
+        print_from[13] = '.', print_from[14] = '.', print_from[15] = '.',
+        print_from[16] = '\0';
+      }
       printf("%s ", print_from);
     }
   }
 }
 
-void get_dims(void) {
+void get_dims(void)
+{
   struct winsize sz;
   if (ioctl(STDIN_FILENO, TIOCGWINSZ, &sz) == -1) {
     return;
@@ -207,7 +248,8 @@ void get_dims(void) {
   term_height = sz.ws_row;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
   int exit_code;
   int short_fmt;
   (void)(argc);
@@ -215,6 +257,7 @@ int main(int argc, char **argv) {
   short_fmt = term_width < 80;
   sscanf(argv[1], "%i", &exit_code);
   seg_begin();
+  print_msystem();
   if (!short_fmt) {
     seg(15, 236);
     print_login_hostname();
