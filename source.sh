@@ -2,8 +2,9 @@
 
 PROMPT_COMMAND=_prompt
 _prompt () {
+  _PROMPT_EXIT_STATUS=$?
   history -a
-  PS1="$(~/.config/dotfiles/bin/prompt $?)"
+  PS1="$(~/.config/dotfiles/bin/prompt $_PROMPT_EXIT_STATUS)"
 }
 
 # misc aliases
