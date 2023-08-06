@@ -69,6 +69,11 @@ passhow() {
   pass show $(find ~/.password-store -name '*.gpg' | sed -e "s:/Users/maxnu/.password-store/::gi" -e "s:.gpg$::gi" | fzf)
 }
 
+# note taking
+notes() {
+  $EDITOR $(ls -1 $NOTES_PATH | fzf)
+}
+
 # git setup
 git config --global user.email "7797957+mnurzia@users.noreply.github.com"
 
