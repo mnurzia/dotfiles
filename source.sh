@@ -2,8 +2,9 @@
 
 PROMPT_COMMAND=_prompt
 _prompt () {
+  _PROMPT_EXIT_STATUS=$?
   history -a
-  PS1="$(~/.config/dotfiles/bin/prompt $?)"
+  PS1="$(~/.config/dotfiles/bin/prompt $_PROMPT_EXIT_STATUS)"
 }
 
 # misc aliases
@@ -66,6 +67,11 @@ export INPUTRC=~/.config/dotfiles/inputrc
 export PASSWORD_STORE_ENABLE_EXTENSIONS=true
 passhow() {
   pass show $(find ~/.password-store -name '*.gpg' | sed -e "s:/Users/maxnu/.password-store/::gi" -e "s:.gpg$::gi" | fzf)
+}
+
+# note taking
+notes() {
+  $EDITOR $(ls -1 $NOTES_PATH | fzf)
 }
 
 # git setup
