@@ -1,0 +1,53 @@
+{
+    "clang-format.executable": "C:\\msys64\\mingw64\\bin\\clang-format.exe",
+    "editor.formatOnSave": true,
+    "terminal.integrated.fontFamily": "\"MesloLGMDZ Nerd Font Mono\"",
+    "[c]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
+    "git.autofetch": true,
+    "git.suggestSmartCommit": false,
+    "[cpp]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
+    "editor.lineHeight": 1.25,
+    "C_Cpp.autocomplete": "disabled",
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "editor.minimap.renderCharacters": false,
+    "editor.minimap.showSlider": "always",
+    "git-graph.repository.showRemoteBranches": false,
+    "terminal.integrated.scrollback": 100000,
+    "editor.renderWhitespace": "none",
+    "diffEditor.ignoreTrimWhitespace": false,
+    "editor.trimAutoWhitespace": false,
+    "editor.experimentalWhitespaceRendering": "off",
+    "apc.activityBar": {
+        "hideSettings": true
+    },
+    "apc.header": {
+        "height": 28
+    },
+    "apc.font.family": "Roboto",
+    "apc.listRow": {
+        "fontSize": 13,
+        "height": 20
+    },
+    "apc.stylesheet": {
+        "#title-actions": {
+            "height": "25px"
+        },
+        "#panel-switcher-container": {
+            "height": "25px"
+        }
+    },
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "scope": "comment",
+                "settings": {
+                    "fontStyle": "italic"
+                }
+            }
+        ]
+    }
+}
