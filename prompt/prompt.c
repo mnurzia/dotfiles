@@ -250,7 +250,7 @@ int main(int argc, char **argv) {
   int exit_code;
   (void)(argc);
   get_dims();
-  short_fmt = term_width < 80;
+  short_fmt = term_width < 80 || getenv("PROMPT_COMPACT");
   sscanf(argv[1], "%i", &exit_code);
   seg_begin();
   print_msystem();
