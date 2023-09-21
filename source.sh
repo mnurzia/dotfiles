@@ -38,14 +38,6 @@ randport () {
   shuf -i 1024-49151 | head -n1
 }
 
-vsc_pipe () {
-  tmp=$(mktemp)
-  cat -- > $tmp
-  vsc $tmp
-  # give vsc a cuppa seconds to load it up
-  sleep 1.5
-  rm -rf $tmp
-}
 
 # git aliases
 alias gp="git push"
@@ -64,6 +56,15 @@ then
   export GIT_EDITOR=nvim
 fi
 alias vsc=code
+
+vsc_pipe () {
+  tmp=$(mktemp)
+  cat -- > $tmp
+  vsc $tmp
+  # give vsc a cuppa seconds to load it up
+  sleep 1.5
+  rm -rf $tmp
+}
 
 # make history infinite
 HISTSIZE=-1
