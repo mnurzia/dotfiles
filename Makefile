@@ -8,9 +8,8 @@ bin:
 bin/prompt: prompt/prompt.c
 	$(CC) prompt/prompt.c -o bin/prompt
 
-bin/colors: colors/colors.py
-	cp colors/colors.py bin/colors
-	chmod +x bin/colors
+bin/colors: colors/colors.c
+	$(CC) colors/colors.c -o bin/colors
 
 bin/get_ip: get_ip/get_ip.sh
 	cp get_ip/get_ip.sh bin/get_ip

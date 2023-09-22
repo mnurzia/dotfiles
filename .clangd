@@ -1,5 +1,5 @@
 CompileFlags:
-  Add: [-Wall, -Werror, -Wextra, -pedantic, -std=c89]
+  Add: [-Wall, -Werror, -Wextra, -pedantic, -std=gnu89]
 InlayHints:
   Enabled: false
 Diagnostics:
