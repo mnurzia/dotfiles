@@ -26,9 +26,8 @@ bin/name_weight: name_weight/name_weight.py
 	cp name_weight/name_weight.py bin/name_weight
 	chmod +x bin/name_weight
 
-bin/ascii: ascii/ascii.py
-	cp ascii/ascii.py bin/ascii
-	chmod +x bin/ascii
+bin/ascii: ascii/ascii.c
+	$(CC) ascii/ascii.c -o bin/ascii
 
 bin/keyprobe: keyprobe/keyprobe.c
 	$(CC) keyprobe/keyprobe.c -o bin/keyprobe
