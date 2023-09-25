@@ -1,7 +1,7 @@
+#include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 
 // Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 // See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
@@ -68,7 +68,7 @@ struct termios orig_termios;
 #include <windows.h>
 #endif
 
-void cleanup() {
+void cleanup(void) {
   printf("\x1b[?1000l\x1b[?1002l\x1b[?1015l\x1b[?1006l\n");
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
@@ -80,7 +80,7 @@ void sig(int s) {
   }
 }
 
-int main() {
+int main(void) {
 #ifdef PLAT_UNIX
   struct termios raw;
   tcgetattr(STDIN_FILENO, &orig_termios);

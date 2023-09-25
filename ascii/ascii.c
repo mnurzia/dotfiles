@@ -5,7 +5,7 @@ const char *ctrls[] = {"\\0", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "\\a",
                        "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
                        "CAN", "EM",  "SUB", "\\e", "FS",  "GS",  "RS",  "US"};
 
-void swatch(int color) { printf("\x1b[%im", color); }
+void swatch(int color) { printf("\x1b[%im\x1b[7m", color); }
 
 void lo(void) {
   int i;
@@ -38,16 +38,16 @@ int main(void) {
         swatch(35);
         printf(" +%02X", idx - 0x80);
       } else if (idx < 0xE0) {
-        swatch(idx < 0xC2 ? 30 : 32);
+        swatch(idx < 0xC2 ? 91 : 32);
         printf("  U2");
       } else if (idx < 0xF0) {
         swatch((idx == 0xE0 || idx == 0xED) ? 33 : 32);
         printf("  U3");
       } else if (idx < 0xF8) {
-        swatch((idx < 0xF5) ? (idx == 0xF0 || idx == 0xF4) ? 33 : 32 : 30);
+        swatch((idx < 0xF5) ? (idx == 0xF0 || idx == 0xF4) ? 33 : 32 : 91);
         printf("  U4");
       } else {
-        swatch(30);
+        swatch(91);
         if (idx < 0xFE) {
           printf("  U%i", idx < 0xF8 ? 4 : idx < 0xFC ? 5 : 6);
         } else {

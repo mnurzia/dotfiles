@@ -74,6 +74,14 @@ void label(const char *text) {
 
 int main(void) {
   int i, j, k;
+  label("ANSI ");
+  ramp8_fg(30);
+  ramp8_bg(40);
+  feed();
+  label(" Ext ");
+  ramp8_fg(90);
+  ramp8_bg(100);
+  feed();
   label(" 256 ");
   ramp8_256(0);
   ramp8_256(8);
@@ -97,14 +105,6 @@ int main(void) {
     }
     feed();
   }
-  label("ANSI ");
-  ramp8_fg(30);
-  ramp8_bg(40);
-  feed();
-  label(" Ext ");
-  ramp8_fg(90);
-  ramp8_bg(100);
-  feed();
   {
     int on[] = {1, 4, 3, 9, 7, 2, 5, 21, 6};
     int off[] = {22, 24, 23, 29, 27, 22, 25, 28, 25};
