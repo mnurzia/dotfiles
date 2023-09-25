@@ -119,16 +119,17 @@ void print_wd(void) {
   char *home = getenv("HOME");
   char *wd = getcwd(buf, PATH_MAX);
   char *obuf = calloc(PATH_MAX, 1);
-  const char *drive = NULL;
+  const char *windows_drive = NULL;
   if (!wd) {
     wd = "<unlinked>";
   }
-  if ((is_wsl() && strstr(wd, "/mnt/") == wd && (wd[6] == '/' || !wd[6]) &&
-       (drive = wd + 5)) ||
-      (is_msys() && (wd[2] == '/' || !wd[2]) && (drive = wd + 1))) {
-    obuf[0] = toupper(*drive);
+  if ((is_wsl() && strstr(wd, "/mnt/") == wd && wd[5] &&
+       (wd[6] == '/' || !wd[6]) && (windows_drive = wd + 5)) ||
+      (is_msys() && wd[1] && (wd[2] == '/' || !wd[2]) &&
+       (windows_drive = wd + 1))) {
+    obuf[0] = toupper(*windows_drive);
     strcat(obuf, ":");
-    strcat(obuf, drive + 1);
+    strcat(obuf, windows_drive + 1);
     {
       char *i = obuf;
       while (*i) {
@@ -148,7 +149,7 @@ void print_wd(void) {
   if (!short_fmt) {
     printf(" %s ", obuf);
   } else {
-    char *last_slash = strrchr(obuf, drive ? '\\' : '/');
+    char *last_slash = strrchr(obuf, windows_drive ? '\\' : '/');
     if (!last_slash) {
       printf(" %s ", obuf);
     } else if (last_slash == obuf && !*(last_slash + 1)) {
