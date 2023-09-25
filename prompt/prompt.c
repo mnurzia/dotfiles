@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <pwd.h>
@@ -6,7 +7,31 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <sys/utsname.h>
 #include <unistd.h>
+
+const char *get_msystem(void) {
+  static int detected = -1;
+  static const char *msystem = NULL;
+  if (detected == -1) {
+    msystem = getenv("MSYSTEM");
+    detected = !!msystem;
+  }
+  return msystem;
+}
+
+int is_msys(void) { return !!get_msystem(); }
+
+int is_wsl(void) {
+  static int detected = -1;
+  if (detected == -1) {
+    struct utsname u;
+    if (uname(&u))
+      return detected = 0;
+    detected = !!strstr(u.release, "microsoft");
+  }
+  return detected;
+}
 
 #define SEG_SEP "\xee\x82\xb0"
 #define SEG_SEP_MINOR "\xee\x82\xb1"
@@ -93,23 +118,37 @@ void print_wd(void) {
   char *buf = malloc(PATH_MAX);
   char *home = getenv("HOME");
   char *wd = getcwd(buf, PATH_MAX);
-  char *obuf = malloc(PATH_MAX);
-  *obuf = '\0';
+  char *obuf = calloc(PATH_MAX, 1);
+  const char *drive = NULL;
   if (!wd) {
     wd = "<unlinked>";
   }
-  if (strncmp(home, wd, strlen(home)) == 0) {
-    strcat(obuf, "~");
-    wd += strlen(home);
-    strcat(obuf, wd);
+  if ((is_wsl() && strstr(wd, "/mnt/") == wd && (wd[6] == '/' || !wd[6]) &&
+       (drive = wd + 5)) ||
+      (is_msys() && (wd[2] == '/' || !wd[2]) && (drive = wd + 1))) {
+    obuf[0] = toupper(*drive);
+    strcat(obuf, ":");
+    strcat(obuf, drive + 1);
+    {
+      char *i = obuf;
+      while (*i) {
+        if (*i == '/')
+          *i = '\\';
+        i++;
+      }
+    }
   } else {
+    if (strncmp(home, wd, strlen(home)) == 0) {
+      strcat(obuf, "~");
+      wd += strlen(home);
+    }
     strcat(obuf, wd);
   }
   seg(15, 234);
   if (!short_fmt) {
     printf(" %s ", obuf);
   } else {
-    char *last_slash = strrchr(obuf, '/');
+    char *last_slash = strrchr(obuf, drive ? '\\' : '/');
     if (!last_slash) {
       printf(" %s ", obuf);
     } else if (last_slash == obuf && !*(last_slash + 1)) {
@@ -150,9 +189,9 @@ void print_hash(void) {
 }
 
 void print_msystem(void) {
-  char *msystem = getenv("MSYSTEM");
-  char *short_msystem = NULL;
-  if (!msystem)
+  const char *msystem = NULL;
+  const char *short_msystem = NULL;
+  if (!(msystem = get_msystem()))
     return;
   if (!strcmp(msystem, "CLANG32"))
     short_msystem = "C32";
