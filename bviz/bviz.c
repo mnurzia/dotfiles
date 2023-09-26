@@ -1,8 +1,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include <stb_image_write.h>
 
 #define APARSE_IMPLEMENTATION
-#include "aparse.h"
+#include <aparse.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -13,14 +13,12 @@
 typedef unsigned char u8;
 typedef unsigned int u32;
 
-u32 make_color(u32 r, u32 g, u32 b, u32 a)
-{
+u32 make_color(u32 r, u32 g, u32 b, u32 a) {
   return (r & 0xFF) | ((g & 0xFF) << 8) | ((b & 0xFF) << 16) |
          ((a & 0xFF) << 24);
 }
 
-u32 lsb_ext(u32 in, u32 iw, u32 ow)
-{
+u32 lsb_ext(u32 in, u32 iw, u32 ow) {
   return (in << (ow - iw)) | (((1 << (ow - iw)) - 1) * (in & 1));
 }
 
@@ -72,28 +70,26 @@ u32 pal_bin(u32 i) /* db: 1-32 */
   return make_color(0xFF, 0xFF, 0xFF, 0xFF) * !!i;
 }
 
-void write_func(void* context, void* data, int size)
-{
-  FILE* f = (FILE*)context;
+void write_func(void *context, void *data, int size) {
+  FILE *f = (FILE *)context;
   fwrite(data, 1, size, f);
 }
 
-int main(int argc, const char* const* argv)
-{
-  u32* buf = NULL;
-  u8* in_buf = malloc(CHUNK_SZ);
+int main(int argc, const char *const *argv) {
+  u32 *buf = NULL;
+  u8 *in_buf = malloc(CHUNK_SZ);
   size_t nlines = 0;
   int w = 16;
   size_t x = 0, y = 0;
-  FILE* f = stdin;
-  FILE* fo = stdout;
+  FILE *f = stdin;
+  FILE *fo = stdout;
   int bw = 8;
   u32 acc = 0;
   int acc_bits = 0;
   int leftover = 8;
-  const char* palette = "xt8";
-  const char* in_name = NULL;
-  const char* out_name = "bviz.png";
+  const char *palette = "xt8";
+  const char *in_name = NULL;
+  const char *out_name = "bviz.png";
   u32 (*pal_fn)(u32);
   aparse_state ap;
   assert(in_buf);
@@ -108,10 +104,10 @@ int main(int argc, const char* const* argv)
 
   aparse_add_opt(&ap, 'p', "palette");
   aparse_arg_type_str(&ap, &palette, NULL);
-  aparse_arg_help(
-      &ap, "palette function, valid options are: xt8, rgba8888, rgb565, "
-           "gray8, bin, "
-           "byteclass8");
+  aparse_arg_help(&ap,
+                  "palette function, valid options are: xt8, rgba8888, rgb565, "
+                  "gray8, bin, "
+                  "byteclass8");
 
   aparse_add_opt(&ap, 'i', NULL);
   aparse_arg_type_str(&ap, &in_name, NULL);
@@ -151,14 +147,14 @@ int main(int argc, const char* const* argv)
     f = fopen(in_name, "r");
 
   while (!feof(f)) {
-    size_t in = fread((void*)in_buf, 1, CHUNK_SZ, f);
+    size_t in = fread((void *)in_buf, 1, CHUNK_SZ, f);
     size_t i;
     u32 mask;
     for (i = 0; i < in;) {
       int out_shift;
       if (y >= nlines) {
         size_t new_lines = nlines ? nlines * 2 : 4;
-        buf = (u32*)realloc(buf, new_lines * w * sizeof(u32));
+        buf = (u32 *)realloc(buf, new_lines * w * sizeof(u32));
         memset(buf + nlines * w * 4, 0, (new_lines - nlines) * w * sizeof(u32));
         nlines = new_lines;
       }
@@ -185,7 +181,7 @@ int main(int argc, const char* const* argv)
   if (out_name)
     fo = fopen(out_name, "w");
   if (y)
-    stbi_write_png_to_func(&write_func, (void*)fo, w, y, 4, buf, 0);
+    stbi_write_png_to_func(&write_func, (void *)fo, w, y, 4, buf, 0);
   aparse_destroy(&ap);
   return 0;
 }

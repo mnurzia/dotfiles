@@ -109,7 +109,7 @@ PROMPT_COMMAND=_prompt
 _prompt () {
   _PROMPT_EXIT_STATUS=$?
   history -a
-  PS1="$("$DOTFILES_DIR"/bin/prompt $_PROMPT_EXIT_STATUS)"
+  PS1="$("$DOTFILES_DIR"/bin/prompt -x $_PROMPT_EXIT_STATUS -j "$(jobs | wc -l)")"
 }
 
 # signifies correct loading

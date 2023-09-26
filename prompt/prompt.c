@@ -10,6 +10,9 @@
 #include <sys/utsname.h>
 #include <unistd.h>
 
+#define APARSE_IMPLEMENTATION
+#include <aparse.h>
+
 /* Get value of MSYSTEM environment variable. If unavailable, return NULL. */
 const char *get_msystem(void) {
   static int detected = -1;
@@ -41,6 +44,7 @@ int is_wsl(void) {
 #define SEG_SEP_MINOR "\xee\x82\xb1"
 #define BRANCH_ICON "\xee\x9c\xa5"
 #define WINDOWS_ICON "\xee\x98\xaa"
+#define GEAR_ICON "\xf3\xb0\x92\x93"
 
 int last_seg_bg = -1;
 
@@ -222,6 +226,13 @@ void print_msystem(void) {
   printf(" " WINDOWS_ICON " %s ", short_msystem);
 }
 
+void print_job_count(int job_count) {
+  if (job_count) {
+    seg(15, 69);
+    printf(" " GEAR_ICON "%i ", job_count);
+  }
+}
+
 void print_git_branch(void) {
   char *wd_buf = malloc(PATH_MAX);
   char *git_buf = malloc(PATH_MAX);
@@ -293,14 +304,24 @@ void get_dims(void) {
   term_height = sz.ws_row;
 }
 
-int main(int argc, char **argv) {
-  int exit_code;
+int main(int argc, const char *const *argv) {
+  int exit_code = 0;
+  int job_count = 0;
+  aparse_state parser;
   (void)(argc);
+  aparse_init(&parser);
+  aparse_add_opt(&parser, 'x', "exit-status");
+  aparse_arg_type_int(&parser, &exit_code);
+  aparse_arg_help(&parser, "exit status of previous command");
+  aparse_add_opt(&parser, 'j', "job-count");
+  aparse_arg_type_int(&parser, &job_count);
+  aparse_arg_help(&parser, "number of background jobs");
+  aparse_parse(&parser, argc, argv);
   get_dims();
   short_fmt = term_width < 80 || getenv("PROMPT_COMPACT");
-  sscanf(argv[1], "%i", &exit_code);
   seg_begin();
   print_msystem();
+  print_job_count(job_count);
   if (!short_fmt) {
     print_login_hostname();
   }
