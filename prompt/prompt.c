@@ -10,6 +10,7 @@
 #include <sys/utsname.h>
 #include <unistd.h>
 
+/* Get value of MSYSTEM environment variable. If unavailable, return NULL. */
 const char *get_msystem(void) {
   static int detected = -1;
   static const char *msystem = NULL;
@@ -20,14 +21,17 @@ const char *get_msystem(void) {
   return msystem;
 }
 
+/* Are we running on MSYS? */
 int is_msys(void) { return !!get_msystem(); }
 
+/* Are we running on WSL? */
 int is_wsl(void) {
   static int detected = -1;
   if (detected == -1) {
     struct utsname u;
     if (uname(&u))
       return detected = 0;
+    /* if "microsoft" in release name, good chance we're WSL */
     detected = !!strstr(u.release, "microsoft");
   }
   return detected;
@@ -129,13 +133,16 @@ void print_wd(void) {
        (windows_drive = wd + 1))) {
     obuf[0] = toupper(*windows_drive);
     strcat(obuf, ":");
-    strcat(obuf, windows_drive + 1);
     {
-      char *i = obuf;
-      while (*i) {
-        if (*i == '/')
-          *i = '\\';
-        i++;
+      char *out = obuf + strlen(obuf);
+      const char *in = windows_drive + 1;
+      while (*in) {
+        if (*in == '/') {
+          *(out++) = '\\';
+          *(out++) = '\\';
+        } else
+          *(out++) = *in;
+        in++;
       }
     }
   } else {
