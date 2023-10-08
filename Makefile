@@ -31,7 +31,7 @@ bin/ascii: ascii/ascii.c
 	$(CC) $(CFLAGS) ascii/ascii.c -o bin/ascii
 
 bin/keyprobe: keyprobe/keyprobe.c
-	$(CC) $(CFLAGS) keyprobe/keyprobe.c -o bin/keyprobe
+	$(CC) $(CFLAGS) -std=gnu99 keyprobe/keyprobe.c -o bin/keyprobe
 
 bin/bviz: bviz/bviz.c include/aparse.c
 	$(CC) $(CFLAGS) -std=c99 bviz/bviz.c include/aparse.c -o bin/bviz
