@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=--std=gnu99 -Wall -Wpedantic -Werror -Wextra -Wshadow -Iinclude
+CFLAGS=--std=c89 -Wall -Wpedantic -Werror -Wextra -Wshadow -Iinclude -g
 
 all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii bin/bviz ~/.vimrc bin/keyprobe ~/.config/nvim
 
@@ -33,8 +33,8 @@ bin/ascii: ascii/ascii.c
 bin/keyprobe: keyprobe/keyprobe.c
 	$(CC) $(CFLAGS) keyprobe/keyprobe.c -o bin/keyprobe
 
-bin/bviz: bviz/bviz.c
-	$(CC) $(CFLAGS) bviz/bviz.c -o bin/bviz
+bin/bviz: bviz/bviz.c include/aparse.c
+	$(CC) $(CFLAGS) -std=c99 bviz/bviz.c include/aparse.c -o bin/bviz
 
 ~/.vimrc: vimrc
 	ln -s ~/.config/dotfiles/vimrc ~/.vimrc

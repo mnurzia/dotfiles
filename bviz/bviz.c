@@ -1,7 +1,8 @@
+#define VERSION "0.1.0"
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-#define APARSE_IMPLEMENTATION
 #include <aparse.h>
 
 #include <assert.h>
@@ -75,6 +76,13 @@ void write_func(void *context, void *data, int size) {
   fwrite(data, 1, size, f);
 }
 
+typedef u32 (*pal)(u32);
+const char *palette_names[] = {"xt8", "rgba8888",   "rgb565", "gray8",
+                               "bin", "byteclass8", NULL};
+
+pal palette_funcs[] = {pal_xt8,   pal_rgba8888, pal_rgb565,
+                       pal_gray8, pal_bin,      pal_byteclass8};
+
 int main(int argc, const char *const *argv) {
   u32 *buf = NULL;
   u8 *in_buf = malloc(CHUNK_SZ);
@@ -87,61 +95,52 @@ int main(int argc, const char *const *argv) {
   u32 acc = 0;
   int acc_bits = 0;
   int leftover = 8;
-  const char *palette = "xt8";
+  int palette_idx = 0;
   const char *in_name = NULL;
   const char *out_name = "bviz.png";
-  u32 (*pal_fn)(u32);
-  aparse_state ap;
+  pal pal_fn;
+  ap *parser;
   assert(in_buf);
-  aparse_init(&ap);
-  aparse_add_opt(&ap, 'w', NULL);
-  aparse_arg_type_int(&ap, &w);
-  aparse_arg_help(&ap, "width of output file");
+  parser = ap_init(argv[0]);
+  ap_opt(parser, 'w', NULL);
+  ap_type_int(parser, &w);
+  ap_help(parser, "width of output file");
+  ap_metavar(parser, "WIDTH");
 
-  aparse_add_opt(&ap, 'b', NULL);
-  aparse_arg_type_int(&ap, &bw);
-  aparse_arg_help(&ap, "input bits per output pixel [1, 32]");
+  ap_opt(parser, 'b', NULL);
+  ap_type_int(parser, &bw);
+  ap_help(parser, "input bits per output pixel [1, 32]");
+  ap_metavar(parser, "BITS");
 
-  aparse_add_opt(&ap, 'p', "palette");
-  aparse_arg_type_str(&ap, &palette, NULL);
-  aparse_arg_help(&ap,
-                  "palette function, valid options are: xt8, rgba8888, rgb565, "
-                  "gray8, bin, "
-                  "byteclass8");
+  ap_opt(parser, 'p', "palette");
+  ap_type_enum(parser, &palette_idx, palette_names);
+  ap_help(parser, "palette function");
 
-  aparse_add_opt(&ap, 'i', NULL);
-  aparse_arg_type_str(&ap, &in_name, NULL);
+  ap_opt(parser, 'i', NULL);
+  ap_type_str(parser, &in_name);
+  ap_help(parser, "input filename");
+  ap_metavar(parser, "FILE");
 
-  aparse_add_opt(&ap, 'o', NULL);
-  aparse_arg_type_str(&ap, &out_name, NULL);
-  aparse_arg_help(&ap, "output filename");
+  ap_opt(parser, 'o', NULL);
+  ap_type_str(parser, &out_name);
+  ap_help(parser, "output filename");
+  ap_metavar(parser, "FILE");
 
-  aparse_add_opt(&ap, 'h', "help");
-  aparse_arg_type_help(&ap);
-  aparse_arg_help(&ap, "show this help text and exit");
+  ap_opt(parser, 'h', "help");
+  ap_type_help(parser);
+  ap_help(parser, "show this help text and exit");
 
-  if (aparse_parse(&ap, argc, argv)) {
+  ap_opt(parser, 'v', "version");
+  ap_type_version(parser, VERSION);
+  ap_help(parser, "show version");
+
+  if ((bw = ap_parse(parser, argc - 1, argv + 1))) {
     return EXIT_FAILURE;
   }
 
   assert(bw >= 1 && bw <= 32);
   assert(w > 0);
-  if (!strcmp(palette, "xt8")) {
-    pal_fn = &pal_xt8;
-  } else if (!strcmp(palette, "rgba8888")) {
-    pal_fn = &pal_rgba8888;
-  } else if (!strcmp(palette, "rgb565")) {
-    pal_fn = &pal_rgb565;
-  } else if (!strcmp(palette, "gray8")) {
-    pal_fn = &pal_gray8;
-  } else if (!strcmp(palette, "bin")) {
-    pal_fn = &pal_bin;
-  } else if (!strcmp(palette, "byteclass8")) {
-    pal_fn = &pal_byteclass8;
-  } else {
-    printf("invalid palette: %s\n", palette);
-    return EXIT_FAILURE;
-  }
+  pal_fn = palette_funcs[palette_idx];
 
   if (in_name)
     f = fopen(in_name, "r");
@@ -182,6 +181,6 @@ int main(int argc, const char *const *argv) {
     fo = fopen(out_name, "w");
   if (y)
     stbi_write_png_to_func(&write_func, (void *)fo, w, y, 4, buf, 0);
-  aparse_destroy(&ap);
+  ap_destroy(parser);
   return 0;
 }
