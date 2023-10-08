@@ -6,8 +6,8 @@ all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight 
 bin:
 	mkdir -p bin
 
-bin/prompt: prompt/prompt.c
-	$(CC) $(CFLAGS) prompt/prompt.c -o bin/prompt
+bin/prompt: prompt/prompt.c include/aparse.c
+	$(CC) $(CFLAGS) prompt/prompt.c include/aparse.c -o bin/prompt
 
 bin/colors: colors/colors.c
 	$(CC) $(CFLAGS) colors/colors.c -o bin/colors
