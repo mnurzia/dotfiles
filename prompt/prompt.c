@@ -307,16 +307,16 @@ void get_dims(void) {
 int main(int argc, const char *const *argv) {
   int exit_code = 0;
   int job_count = 0;
-  aparse_state parser;
+  ap *parser;
   (void)(argc);
-  aparse_init(&parser);
-  aparse_add_opt(&parser, 'x', "exit-status");
-  aparse_arg_type_int(&parser, &exit_code);
-  aparse_arg_help(&parser, "exit status of previous command");
-  aparse_add_opt(&parser, 'j', "job-count");
-  aparse_arg_type_int(&parser, &job_count);
-  aparse_arg_help(&parser, "number of background jobs");
-  aparse_parse(&parser, argc, argv);
+  parser = ap_init(argv[0]);
+  ap_opt(parser, 'x', "exit-status");
+  ap_type_int(parser, &exit_code);
+  ap_help(parser, "exit status of previous command");
+  ap_opt(parser, 'j', "job-count");
+  ap_type_int(parser, &job_count);
+  ap_help(parser, "number of background jobs");
+  ap_parse(parser, argc - 1, argv + 1);
   get_dims();
   short_fmt = term_width < 80 || getenv("PROMPT_COMPACT");
   seg_begin();
