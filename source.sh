@@ -36,6 +36,8 @@ reap() {
   for job in $(jobs -ps); do
     kill -9 "$job"
   done
+  # give prompt a moment to catch up (otherwise SIGCHILD doesn't hit bash til' after prompt)
+  sleep 0.1
 }
 
 # ls aliases
@@ -111,6 +113,8 @@ _prompt () {
   history -a
   PS1="$("$DOTFILES_DIR"/bin/prompt -x $_PROMPT_EXIT_STATUS -j "$(jobs | wc -l)")"
 }
+
+export PYTHONSTARTUP=$DOTFILES_DIR/pythonrc
 
 # signifies correct loading
 fetch
