@@ -67,12 +67,12 @@ alias gc="git commit"
 alias gs="git status"
 
 # editor modifications
-if command -v nvim > /dev/null 2>&1
-then
-  alias nano="nvim"
-  export EDITOR=nvim
-  export GIT_EDITOR=nvim
-fi
+# if command -v nvim > /dev/null 2>&1
+# then
+#   alias nano="nvim"
+#   export EDITOR=nvim
+#   export GIT_EDITOR=nvim
+# fi
 
 # vscode integration
 alias vsc=code
