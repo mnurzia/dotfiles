@@ -86,8 +86,8 @@ vsc_pipe () {
 }
 
 # make history infinite
-HISTSIZE=-1
-HISTFILESIZE=-1
+export HISTSIZE=
+export HISTFILESIZE=
 
 # inputrc modifications
 export INPUTRC=$DOTFILES_DIR/inputrc
