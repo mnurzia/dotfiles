@@ -36,6 +36,8 @@ reap() {
   for job in $(jobs -ps); do
     kill -9 "$job"
   done
+  # give prompt a moment to catch up (otherwise SIGCHILD doesn't hit bash til' after prompt)
+  sleep 0.1
 }
 
 # ls aliases
@@ -65,12 +67,12 @@ alias gc="git commit"
 alias gs="git status"
 
 # editor modifications
-if command -v nvim > /dev/null 2>&1
-then
-  alias nano="nvim"
-  export EDITOR=nvim
-  export GIT_EDITOR=nvim
-fi
+# if command -v nvim > /dev/null 2>&1
+# then
+#   alias nano="nvim"
+#   export EDITOR=nvim
+#   export GIT_EDITOR=nvim
+# fi
 
 # vscode integration
 alias vsc=code
@@ -111,6 +113,8 @@ _prompt () {
   history -a
   PS1="$("$DOTFILES_DIR"/bin/prompt -x $_PROMPT_EXIT_STATUS -j "$(jobs | wc -l)")"
 }
+
+export PYTHONSTARTUP=$DOTFILES_DIR/pythonrc
 
 # signifies correct loading
 fetch
