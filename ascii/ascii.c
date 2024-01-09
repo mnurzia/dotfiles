@@ -5,7 +5,7 @@ const char *ctrls[] = {"\\0", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "\\a",
                        "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
                        "CAN", "EM",  "SUB", "\\e", "FS",  "GS",  "RS",  "US"};
 
-void swatch(int color) { printf("\x1b[%im\x1b[7m", color); }
+void swatch(int color) { printf("\x1b[%im", color); }
 
 void lo(void) {
   int i;
