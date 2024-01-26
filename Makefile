@@ -7,7 +7,7 @@ bin:
 	mkdir -p bin
 
 bin/prompt: prompt/prompt.c include/aparse.c
-	$(CC) $(CFLAGS) prompt/prompt.c include/aparse.c -o bin/prompt
+	$(CC) $(CFLAGS) --std=gnu89 prompt/prompt.c include/aparse.c -o bin/prompt
 
 bin/colors: colors/colors.c
 	$(CC) $(CFLAGS) colors/colors.c -o bin/colors
