@@ -92,7 +92,16 @@ void print_login_hostname(void) {
   printf("%s", buf2);
   fg(245);
   printf("@");
-  fg(105);
+  {
+    char *color = getenv("PROMPT_USER_COLORS");
+    int f;
+    if (color) {
+      sscanf(color, "%i", &f);
+    } else {
+      f = 105;
+    }
+    fg(f);
+  }
   printf("%s", buf);
   free(buf);
   free(buf2);
