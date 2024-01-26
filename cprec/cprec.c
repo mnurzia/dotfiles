@@ -160,8 +160,8 @@ const prec PREC[] = {
     },
 };
 
-const char *format_op(const prec *prec, int width) {
-  const char *in = prec->op;
+const char *format_op(const prec *pp, int width) {
+  const char *in = pp->op;
   char *out = malloc(width * 8);
   char *p = out;
   int color = -1, i = 0;
