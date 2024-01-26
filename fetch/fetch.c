@@ -4,8 +4,37 @@
 #include <time.h>
 #include <unistd.h>
 
-#define PL_FULL "\xEE\x82\xB0" /* U+E0B0 */
-#define PL_LINE "\xEE\x82\xB1" /* U+E0B1 */
+#define GRAY "\x1b[38;5;245m"
+#define WHITE "\x1b[38;5;15m"
+
+void fg(int fg) { printf("\x1b[38;5;%im", fg); }
+
+void bg(int bg) { printf("\x1b[48;5;%im", bg); }
+
+void clear(void) { printf("\x1b[0m"); }
+
+void print_path(const char *path) {
+  const char *last;
+  if (*path == '~') {
+    fg(245);
+    printf("%c", *(path++));
+    clear();
+  }
+  last = path;
+  while (1) {
+    if (*path == '/' || !*path) {
+      printf("%.*s", (unsigned int)(path - last), last);
+      if (!*path)
+        return;
+      fg(245);
+      printf("%c", *(path++));
+      fg(15);
+      last = path;
+    } else {
+      path++;
+    }
+  }
+}
 
 int main(void) {
   char *tty_name = ttyname(STDIN_FILENO);
@@ -18,10 +47,15 @@ int main(void) {
   }
   t = time(NULL);
   tmp = localtime(&t);
-  strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", tmp);
+  strftime(timestr, sizeof(timestr),
+           "%Y" GRAY "-" WHITE "%m" GRAY "-" WHITE "%d %H" GRAY ":" WHITE
+           "%M" GRAY ":" WHITE "%S",
+           tmp);
   shell = shell ? strrchr(shell, '/') + 1 : "<no shell>";
-  printf("\x1b[48;5;236m\x1b[38;5;15m %s " PL_LINE " %s " PL_LINE " %s "
-         "\x1b[0m\x1b[38;5;236m" PL_FULL "\x1b[0m\n",
-         timestr, shell, tty_name);
+  fg(15);
+  printf("%s %s ", timestr, shell);
+  print_path(tty_name);
+  printf("\n");
+  clear();
   return 0;
 }
