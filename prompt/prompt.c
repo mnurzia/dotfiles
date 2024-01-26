@@ -53,49 +53,19 @@ int term_height = 24;
 
 int short_fmt = 0;
 
-void put_fg(int fg) { printf("\\[\x1b[38;5;%im\\]", fg); }
+void fg(int fg) { printf("\\[\x1b[38;5;%im\\]", fg); }
 
-void put_bg(int bg) { printf("\\[\x1b[48;5;%im\\]", bg); }
-
-void put_sep(void) { printf(SEG_SEP); }
-
-void put_sep_minor(void) { printf(SEG_SEP_MINOR); }
+void bg(int bg) { printf("\\[\x1b[48;5;%im\\]", bg); }
 
 void clear(void) { printf("\\[\x1b[0m\\]"); }
 
-void seg_begin(void) { clear(); }
-
-/* Output segment with foreground and background. */
-void seg(int fg, int bg) {
-  if (last_seg_bg != -1) {
-    put_fg(last_seg_bg);
-    put_bg(bg);
-    put_sep();
-  }
-  put_fg(fg);
-  put_bg(bg);
-  last_seg_bg = bg;
-}
-
-void seg_minor(int fg, int bg, int seg_col) {
-  if (last_seg_bg != -1) {
-    put_fg(seg_col);
-    put_bg(bg);
-    put_sep_minor();
-  }
-  put_fg(fg);
-  put_bg(bg);
-  last_seg_bg = bg;
-}
-
-void seg_end(void) {
-  clear();
-  put_fg(last_seg_bg);
-  put_sep();
+void end(void) {
   clear();
   printf(" ");
   fflush(stdout);
 }
+
+void print_sep(void) { printf(" "); }
 
 void print_login_hostname(void) {
   char *buf;
@@ -116,10 +86,40 @@ void print_login_hostname(void) {
       c++;
     }
   }
-  seg(15, 236);
-  printf(" %s@%s ", buf2, buf);
+  clear();
+  fg(15);
+  printf("%s", buf2);
+  fg(245);
+  printf("@");
+  fg(105);
+  printf("%s", buf);
   free(buf);
   free(buf2);
+  clear();
+  print_sep();
+}
+
+void print_path(const char *path) {
+  const char *last;
+  if (*path == '~') {
+    fg(245);
+    printf("%c", *(path++));
+    clear();
+  }
+  last = path;
+  while (1) {
+    if (*path == '/' || !*path) {
+      printf("%.*s", (unsigned int)(path - last), last);
+      if (!*path)
+        return;
+      fg(245);
+      printf("%c", *(path++));
+      fg(15);
+      last = path;
+    } else {
+      path++;
+    }
+  }
 }
 
 void print_wd(void) {
@@ -156,47 +156,37 @@ void print_wd(void) {
     }
     strcat(obuf, wd);
   }
-  seg(15, 234);
+  fg(15);
   if (!short_fmt) {
-    printf(" %s ", obuf);
+    print_path(obuf);
   } else {
     char *last_slash = strrchr(obuf, windows_drive ? '\\' : '/');
     if (!last_slash) {
-      printf(" %s ", obuf);
+      print_path(obuf);
     } else if (last_slash == obuf && !*(last_slash + 1)) {
       /* "/" */
-      printf(" %s ", obuf);
+      print_path(obuf);
     } else {
-      printf(" %s ", last_slash + 1);
+      print_path(last_slash + 1);
     }
   }
+  print_sep();
+  clear();
 }
 
 void print_exit(int exit_code) {
-  seg(15, 9);
-  printf(" %i ", exit_code);
-}
-
-void seg_user_color(void) {
-  char *color = getenv("PROMPT_USER_COLORS");
-  int fg, bg;
-  if (getuid() == 0) {
-    fg = 15;
-    bg = 229;
-  } else if (color) {
-    sscanf(color, "%i, %i", &fg, &bg);
-  } else {
-    fg = 15;
-    bg = 99;
-  }
-  seg(fg, bg);
+  fg(9);
+  printf("%i ", exit_code);
 }
 
 void print_hash(void) {
+  clear();
   if (getuid() == 0) {
-    printf(" # ");
+    fg(196);
+    printf("#");
   } else {
-    printf(" $ ");
+    fg(15);
+    printf("$");
   }
 }
 
@@ -222,14 +212,14 @@ void print_msystem(void) {
     short_msystem = "*";
   if (!short_msystem)
     return;
-  seg(15, 234);
-  printf(" " WINDOWS_ICON " %s ", short_msystem);
+  fg(135);
+  printf("%s" WINDOWS_ICON " ", short_msystem);
 }
 
 void print_job_count(int job_count) {
   if (job_count) {
-    seg(15, 69);
-    printf(" " GEAR_ICON "%i ", job_count);
+    fg(69);
+    printf("%i" GEAR_ICON " ", job_count);
   }
 }
 
@@ -278,20 +268,23 @@ void print_git_branch(void) {
     if (nl) {
       *nl = '\0';
     }
-    seg_minor(15, 234, 239);
     if (git_rank > 1) {
-      printf(" %i" BRANCH_ICON " ", git_rank);
-    } else {
-      printf(" " BRANCH_ICON " ");
+      fg(250);
+      printf("%i", git_rank);
     }
+    fg(243);
+    printf(BRANCH_ICON);
     if (!short_fmt) {
+      fg(117);
       if (strlen(print_from) >= 16) {
         /* trim branch if too long */
         print_from[13] = '.', print_from[14] = '.', print_from[15] = '.',
         print_from[16] = '\0';
       }
-      printf("%s ", print_from);
+      printf("%s", print_from);
     }
+    clear();
+    printf(" ");
   }
 }
 
@@ -319,7 +312,6 @@ int main(int argc, const char *const *argv) {
   ap_parse(parser, argc - 1, argv + 1);
   get_dims();
   short_fmt = term_width < 80 || getenv("PROMPT_COMPACT");
-  seg_begin();
   print_msystem();
   print_job_count(job_count);
   if (!short_fmt) {
@@ -330,8 +322,7 @@ int main(int argc, const char *const *argv) {
   if (exit_code != 0) {
     print_exit(exit_code);
   }
-  seg_user_color();
   print_hash();
-  seg_end();
+  end();
   return 0;
 }

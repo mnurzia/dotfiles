@@ -16,6 +16,5 @@ if __name__ == "__main__":
     for m in finditer(VOCAB_REGEX, args.input.read(), M):
         line, word = m.groups()
         if args.definition:
-            print(line.replace(word, "________"), file=args.output)
-        else:
-            print(word, file=args.output)
+            word = line.replace(word, "________")
+        print(word, file=args.output)
