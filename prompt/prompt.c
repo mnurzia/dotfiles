@@ -1,4 +1,6 @@
+#include <assert.h>
 #include <ctype.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <pwd.h>
@@ -41,90 +43,69 @@ int is_wsl(void) {
   return detected;
 }
 
-#define SEG_SEP "\xee\x82\xb0"
-#define SEG_SEP_MINOR "\xee\x82\xb1"
 #define BRANCH_ICON "\xee\x9c\xa5"
 #define WINDOWS_ICON "\xee\x98\xaa"
 #define GEAR_ICON "\xf3\xb0\x92\x93"
 
-int last_seg_bg = -1;
+#define C_WHITE 15
+#define C_GRAY 245
+#define C_LIGHTGRAY 250
+#define C_RED 9
+#define C_PURPLE 69
+#define C_LIGHTBLUE 117
+#define C_LIGHTRED 196
+
+#define SIFY(x) #x
+#define FG(x) "\\[\x1b[38;5;" SIFY(x) "m\\]"
+#define FG_FMT "\\[\x1b[38;5;%im\\]"
+#define CLR "\\[\x1b[0m\\]"
+#define SEP " "
 
 int term_width = 80;
 int term_height = 24;
 
 int short_fmt = 0;
 
-void fg(int fg) { printf("\\[\x1b[38;5;%im\\]", fg); }
-
-void bg(int bg) { printf("\\[\x1b[48;5;%im\\]", bg); }
-
-void clear(void) { printf("\\[\x1b[0m\\]"); }
+void print_sep(void) { printf(SEP); }
 
 void end(void) {
-  clear();
-  printf(" ");
+  printf(CLR);
   fflush(stdout);
 }
 
-void print_sep(void) { printf(" "); }
-
 void print_login_hostname(void) {
-  char *buf;
-  char *buf2;
-  struct passwd pwd;
-  struct passwd *out;
-  buf = malloc(80);
-  buf2 = malloc(160);
-  *buf = '\0';
-  getpwuid_r(getuid(), &pwd, buf2, 160, &out);
-  gethostname(buf, 80);
-  {
-    char *c = buf;
-    while (*c) {
-      if (*c == '.') {
-        *c = '\0';
-      }
-      c++;
-    }
-  }
-  clear();
-  fg(15);
-  printf("%s", buf2);
-  fg(245);
-  printf("@");
-  {
-    char *color = getenv("PROMPT_USER_COLORS");
-    int f;
-    if (color) {
-      sscanf(color, "%i", &f);
-    } else {
-      f = 105;
-    }
-    fg(f);
-  }
-  printf("%s", buf);
-  free(buf);
-  free(buf2);
-  clear();
-  print_sep();
+  char *hostname_buf, *username_buf, *first_dot, *color;
+  struct passwd pwd, *out;
+  int hostname_fg = 105;
+  hostname_buf = malloc(1024);
+  username_buf = malloc(1024);
+  *hostname_buf = '\0';
+  getpwuid_r(getuid(), &pwd, username_buf, 1024, &out);
+  gethostname(hostname_buf, 1024);
+  if ((first_dot = strchr(hostname_buf, '.')))
+    *first_dot = '\0';
+  color = getenv("PROMPT_USER_COLORS");
+  if (color)
+    sscanf(color, "%i", &hostname_fg);
+  printf(FG(C_WHITE) "%s" FG(C_GRAY) "@" FG_FMT "%s" CLR SEP, username_buf,
+         hostname_fg, hostname_buf);
+  free(hostname_buf);
+  free(username_buf);
 }
 
 void print_path(const char *path) {
   const char *last;
-  if (*path == '~') {
-    fg(245);
-    printf("%c", *(path++));
-    clear();
-  }
+  if (*path == '~')
+    printf(FG(C_GRAY) "%c" CLR, *(path++));
   last = path;
   while (1) {
     if (*path == '/' || !*path) {
       printf("%.*s", (unsigned int)(path - last), last);
-      if (!*path)
+      if (!*path) {
+        printf(CLR SEP);
         return;
-      fg(245);
-      printf("%c", *(path++));
-      fg(15);
+      }
+      printf(FG(C_GRAY) "%c" FG(C_WHITE), *(path++));
       last = path;
     } else {
       path++;
@@ -133,71 +114,61 @@ void print_path(const char *path) {
 }
 
 void print_wd(void) {
-  char *buf = malloc(PATH_MAX);
+  char *wd = malloc(PATH_MAX);
   char *home = getenv("HOME");
-  char *wd = getcwd(buf, PATH_MAX);
   char *obuf = calloc(PATH_MAX, 1);
   const char *windows_drive = NULL;
-  if (!wd) {
+  if (!getcwd(wd, PATH_MAX)) {
     wd = "<unlinked>";
-  }
-  if ((is_wsl() && strstr(wd, "/mnt/") == wd && wd[5] &&
-       (wd[6] == '/' || !wd[6]) && (windows_drive = wd + 5)) ||
-      (is_msys() && wd[1] && (wd[2] == '/' || !wd[2]) &&
-       (windows_drive = wd + 1))) {
+  } else if ((is_wsl() && strstr(wd, "/mnt/") == wd && wd[5] &&
+              (wd[6] == '/' || !wd[6]) && (windows_drive = wd + 5)) ||
+             (is_msys() && wd[1] && (wd[2] == '/' || !wd[2]) &&
+              (windows_drive = wd + 1))) {
+    /* on MSYS/WSL -- need to fixup path */
     obuf[0] = toupper(*windows_drive);
     strcat(obuf, ":");
     {
+      /* replace all / with \\ */
       char *out = obuf + strlen(obuf);
       const char *in = windows_drive + 1;
       while (*in) {
-        if (*in == '/') {
-          *(out++) = '\\';
-          *(out++) = '\\';
-        } else
-          *(out++) = *in;
-        in++;
+        if (*in == '/')
+          *(out++) = '\\', *(out++) = '\\', in++;
+        else
+          *(out++) = *in, in++;
       }
     }
   } else {
+    /* don't fixup path, replace $HOME with ~ */
     if (strncmp(home, wd, strlen(home)) == 0) {
       strcat(obuf, "~");
       wd += strlen(home);
     }
     strcat(obuf, wd);
   }
-  fg(15);
   if (!short_fmt) {
     print_path(obuf);
   } else {
     char *last_slash = strrchr(obuf, windows_drive ? '\\' : '/');
     if (!last_slash) {
+      /* no slashes in path */
       print_path(obuf);
     } else if (last_slash == obuf && !*(last_slash + 1)) {
-      /* "/" */
+      /* root directory "/" */
       print_path(obuf);
     } else {
+      /* print final path component */
       print_path(last_slash + 1);
     }
   }
-  print_sep();
-  clear();
 }
 
-void print_exit(int exit_code) {
-  fg(9);
-  printf("%i ", exit_code);
+void print_exit_status(int exit_code) {
+  printf(FG(C_RED) "%i" CLR SEP, exit_code);
 }
 
 void print_hash(void) {
-  clear();
-  if (getuid() == 0) {
-    fg(196);
-    printf("#");
-  } else {
-    fg(15);
-    printf("$");
-  }
+  printf("%s" CLR SEP, (getuid() == 0) ? FG(C_LIGHTRED) "#" : FG(C_WHITE) "$");
 }
 
 void print_msystem(void) {
@@ -222,89 +193,79 @@ void print_msystem(void) {
     short_msystem = "*";
   if (!short_msystem)
     return;
-  fg(135);
-  printf("%s" WINDOWS_ICON " ", short_msystem);
+  printf(FG(C_PURPLE) "%s" WINDOWS_ICON CLR SEP, short_msystem);
 }
 
 void print_job_count(int job_count) {
-  if (job_count) {
-    fg(69);
-    printf("%i" GEAR_ICON " ", job_count);
-  }
+  if (job_count)
+    printf(FG(C_PURPLE) "%i" GEAR_ICON CLR SEP, job_count);
 }
 
 void print_git_branch(void) {
-  char *wd_buf = malloc(PATH_MAX);
-  char *git_buf = malloc(PATH_MAX);
-  char *wd = getcwd(wd_buf, PATH_MAX);
+  char *wd = malloc(PATH_MAX), *wd_buf = wd;
+  char *path_buf = malloc(PATH_MAX);
   int git_rank = 0;
-  char head_buf[256] = "";
+  char head_ptr_buf[256] = {0};
+  assert(wd);
+  if (!getcwd(wd, PATH_MAX))
+    goto done;
   /* suffix with / to normalize loop */
-  strcat(wd_buf, "/");
-  if (!wd) {
-    return;
-  }
+  strcat(wd, "/");
   while (*wd) {
-    struct stat sb;
+    struct stat dir_stat_buf;
     /* copy path to temp */
-    strcpy(git_buf, wd_buf);
-    /* copy .git */
-    strcpy(git_buf + (wd - wd_buf) + 1, ".git");
-    if (stat(git_buf, &sb) == 0 && S_ISDIR(sb.st_mode)) {
-      struct stat hb;
-      strcat(git_buf, "/HEAD");
-      if (stat(git_buf, &hb) == 0 && S_ISREG(hb.st_mode)) {
-        /* read HEAD */
-        int hfd = open(git_buf, O_RDONLY);
+    strcpy(path_buf, wd_buf);
+    /* suffix path with .git */
+    strcpy(path_buf + (wd - wd_buf) + 1, ".git");
+    if (stat(path_buf, &dir_stat_buf) == 0 && S_ISDIR(dir_stat_buf.st_mode)) {
+      struct stat head_stat_buf;
+      /* suffix path with HEAD */
+      strcat(path_buf, "/HEAD");
+      if (stat(path_buf, &head_stat_buf) == 0 &&
+          S_ISREG(head_stat_buf.st_mode)) {
+        /* HEAD is readable, attempt to open it and read its pointer */
+        int hfd = open(path_buf, O_RDONLY);
         if (hfd != -1) {
-          read(hfd, head_buf, 256);
+          read(hfd, head_ptr_buf, 256);
           close(hfd);
         }
         git_rank++;
       }
     }
-    /* advance to next dir */
     do {
+      /* advance to next dir: read until next / */
       wd++;
     } while (*wd && *wd != '/');
   }
-  if (head_buf[0]) {
-    char *last_slash = strrchr(head_buf, '/');
-    char *print_from = head_buf;
-    char *nl = strchr(head_buf, '\n');
-    if (last_slash) {
-      print_from = last_slash + 1;
-    }
-    if (nl) {
+  if (head_ptr_buf[0]) {
+    /* if we found any branch */
+    char *last_slash = strrchr(head_ptr_buf, '/'), *output = head_ptr_buf, *nl;
+    if ((nl = strchr(head_ptr_buf, '\n')))
+      /* remove newlines from */
       *nl = '\0';
-    }
-    if (git_rank > 1) {
-      fg(250);
-      printf("%i", git_rank);
-    }
-    fg(243);
-    printf(BRANCH_ICON);
+    if (last_slash)
+      /* strip refs/.../... */
+      output = last_slash + 1;
+    if (git_rank > 1)
+      printf(FG(C_LIGHTGRAY) "%i" CLR, git_rank);
     if (!short_fmt) {
-      fg(117);
-      if (strlen(print_from) >= 16) {
+      if (strlen(output) >= 16)
         /* trim branch if too long */
-        print_from[13] = '.', print_from[14] = '.', print_from[15] = '.',
-        print_from[16] = '\0';
-      }
-      printf("%s", print_from);
-    }
-    clear();
-    printf(" ");
+        output[13] = '.', output[14] = '.', output[15] = '.', output[16] = '\0';
+    } else
+      output = "";
+    printf(FG(C_GRAY) BRANCH_ICON FG(C_LIGHTBLUE) "%s" CLR SEP, output);
   }
+done:
+  free(wd_buf);
+  free(path_buf);
 }
 
 void get_dims(void) {
   struct winsize sz;
-  if (ioctl(STDIN_FILENO, TIOCGWINSZ, &sz) == -1) {
+  if (ioctl(STDIN_FILENO, TIOCGWINSZ, &sz) == -1)
     return;
-  }
-  term_width = sz.ws_col;
-  term_height = sz.ws_row;
+  term_width = sz.ws_col, term_height = sz.ws_row;
 }
 
 int main(int argc, const char *const *argv) {
@@ -330,7 +291,7 @@ int main(int argc, const char *const *argv) {
   print_wd();
   print_git_branch();
   if (exit_code != 0) {
-    print_exit(exit_code);
+    print_exit_status(exit_code);
   }
   print_hash();
   end();
