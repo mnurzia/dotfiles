@@ -95,13 +95,12 @@ void print_login_hostname(void) {
 }
 
 void print_wd(void) {
-  char *path = malloc(PATH_MAX), *win_drv = NULL;
-  char current_path[PATH_MAX], *prefix = path, *next;
-  char *currp = current_path;
+  char *path = malloc(PATH_MAX), *win_drv = NULL, current_path[PATH_MAX],
+       *prefix = path, *next, *currp = current_path;
   DIR *current_dir = NULL;
   int should_shorten = short_fmt;
   if (!getcwd(path, PATH_MAX)) {
-    printf(FG(C_GRAY) "<unlinked>" CLR SEP);
+    printf(FG(C_RED) "<unlinked>" CLR SEP);
     return;
   } else if ((is_wsl() && strstr(path, "/mnt/") == path && path[5] &&
               (path[6] == '/' || !path[6])) ||
@@ -291,14 +290,12 @@ int main(int argc, const char *const *argv) {
   short_fmt = term_width < 80 || getenv("PROMPT_COMPACT");
   print_msystem();
   print_job_count(job_count);
-  if (!short_fmt) {
+  if (!short_fmt)
     print_login_hostname();
-  }
   print_wd();
   print_git_branch();
-  if (exit_code != 0) {
+  if (exit_code != 0)
     print_exit_status(exit_code);
-  }
   print_hash();
   end();
   return 0;
