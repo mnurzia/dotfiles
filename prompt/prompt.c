@@ -58,6 +58,7 @@ int is_wsl(void) {
 #define SIFY(x) #x
 #define FG(x) "\\[\x1b[38;5;" SIFY(x) "m\\]"
 #define FG_FMT "\\[\x1b[38;5;%im\\]"
+#define ITAL "\\[\x1b[3m\\]"
 #define CLR "\\[\x1b[0m\\]"
 #define SEP " "
 
@@ -93,74 +94,79 @@ void print_login_hostname(void) {
   free(username_buf);
 }
 
-void print_path(const char *path) {
-  const char *last;
-  if (*path == '~')
-    printf(FG(C_GRAY) "%c" CLR, *(path++));
-  last = path;
-  while (1) {
-    if (*path == '/' || !*path) {
-      printf("%.*s", (unsigned int)(path - last), last);
-      if (!*path) {
-        printf(CLR SEP);
+void print_wd(void) {
+  char *path = malloc(PATH_MAX), *win_drv = NULL;
+  char current_path[PATH_MAX], *prefix = path, *next;
+  char *currp = current_path;
+  DIR *current_dir = NULL;
+  int should_shorten = short_fmt;
+  if (!getcwd(path, PATH_MAX)) {
+    printf(FG(C_GRAY) "<unlinked>" CLR SEP);
+    return;
+  } else if ((is_wsl() && strstr(path, "/mnt/") == path && path[5] &&
+              (path[6] == '/' || !path[6])) ||
+             (is_msys() && path[1] && (path[2] == '/' || !path[2]))) {
+    /* wsl or msys: backwards slashes, print drive letter */
+    path = win_drv + 1;
+    printf(FG(C_LIGHTGRAY) "%c:", *win_drv);
+  } else {
+    /* attempt to match $HOME with string prefix */
+    char *home = getenv("HOME");
+    if (!strncmp(home, path, strlen(home))) {
+      path = path + strlen(home);
+      printf(FG(C_LIGHTGRAY) "~");
+    }
+  }
+  strcpy(current_path, prefix);
+  currp += path - prefix;
+  while (*path) {
+    const char *max_prefix = should_shorten ? path + 1 : NULL;
+    struct dirent *ent;
+    assert(*path == '/'); /* path is normalized (all segments start with '/') */
+    *(currp++) = *(path++); /* pop slash */
+    *currp = '\0';
+    if (should_shorten) {
+      current_dir = opendir(current_path);
+      if (!current_dir) {
+        /* unable to open directory */
+        printf(FG(C_RED) "!!" CLR SEP);
         return;
       }
-      printf(FG(C_GRAY) "%c" FG(C_WHITE), *(path++));
-      last = path;
-    } else {
-      path++;
-    }
-  }
-}
-
-void print_wd(void) {
-  char *wd = malloc(PATH_MAX);
-  char *home = getenv("HOME");
-  char *obuf = calloc(PATH_MAX, 1);
-  const char *windows_drive = NULL;
-  if (!getcwd(wd, PATH_MAX)) {
-    wd = "<unlinked>";
-  } else if ((is_wsl() && strstr(wd, "/mnt/") == wd && wd[5] &&
-              (wd[6] == '/' || !wd[6]) && (windows_drive = wd + 5)) ||
-             (is_msys() && wd[1] && (wd[2] == '/' || !wd[2]) &&
-              (windows_drive = wd + 1))) {
-    /* on MSYS/WSL -- need to fixup path */
-    obuf[0] = toupper(*windows_drive);
-    strcat(obuf, ":");
-    {
-      /* replace all / with \\ */
-      char *out = obuf + strlen(obuf);
-      const char *in = windows_drive + 1;
-      while (*in) {
-        if (*in == '/')
-          *(out++) = '\\', *(out++) = '\\', in++;
-        else
-          *(out++) = *in, in++;
+      while ((ent = readdir(current_dir))) {
+        size_t i = 0;
+        while (1) {
+          int name_end = !path[i] || path[i] == '/';
+          int entry_end = !ent->d_name[i];
+          if (name_end && entry_end)
+            /* strings equal */
+            break;
+          else if (name_end)
+            /* name shorter than entry */
+            break;
+          else if (entry_end || tolower(path[i]) != tolower(ent->d_name[i])) {
+            /* entry is a prefix of name */
+            max_prefix = path + i + 1 > max_prefix ? path + i + 1 : max_prefix;
+            break;
+          }
+          i++;
+        }
       }
     }
-  } else {
-    /* don't fixup path, replace $HOME with ~ */
-    if (strncmp(home, wd, strlen(home)) == 0) {
-      strcat(obuf, "~");
-      wd += strlen(home);
+    next = (next = strrchr(path, '/')) ? next : path + strlen(path);
+    printf(FG(C_GRAY) "%s", (win_drv ? "\\" : "/"));
+    {
+      size_t num_remaining;
+      if (should_shorten && (num_remaining = next - max_prefix) > 2)
+        /* print shortened segment */
+        printf(FG(C_WHITE) "%.*s" FG(C_GRAY) ITAL "~%u" CLR,
+               (int)(max_prefix - path), path, (unsigned)num_remaining);
+      else
+        /* print normal segment */
+        printf(FG(C_WHITE) "%.*s" FG(C_GRAY), (int)(next - path), path);
     }
-    strcat(obuf, wd);
+    path = next;
   }
-  if (!short_fmt) {
-    print_path(obuf);
-  } else {
-    char *last_slash = strrchr(obuf, windows_drive ? '\\' : '/');
-    if (!last_slash) {
-      /* no slashes in path */
-      print_path(obuf);
-    } else if (last_slash == obuf && !*(last_slash + 1)) {
-      /* root directory "/" */
-      print_path(obuf);
-    } else {
-      /* print final path component */
-      print_path(last_slash + 1);
-    }
-  }
+  printf(CLR SEP);
 }
 
 void print_exit_status(int exit_code) {
