@@ -151,7 +151,7 @@ void print_wd(void) {
         }
       }
     }
-    next = (next = strrchr(path, '/')) ? next : path + strlen(path);
+    next = (next = strchr(path, '/')) ? next : path + strlen(path);
     printf(FG(C_GRAY) "%s", (win_drv ? "\\" : "/"));
     {
       size_t num_remaining;
