@@ -40,6 +40,7 @@ void feed(void) {
 void ramp8_fg(int start) {
   int i;
   for (i = start; i < start + 8; i++) {
+    sgr(i == start && start == 30 ? 100 : 0);
     sgr(i);
     swatch(i, 4);
   }
@@ -49,7 +50,7 @@ void ramp8_bg(int start) {
   int i;
   for (i = start; i < start + 8; i++) {
     sgr(i);
-    sgr(30);
+    sgr(i == start && start == 40 ? 37 : 30);
     swatch(i, 4);
   }
 }
@@ -57,6 +58,7 @@ void ramp8_bg(int start) {
 void ramp8_256(int start) {
   int i;
   for (i = start; i < start + 8; i++) {
+    sgr(i == start && start == 0 ? 37 : 30);
     bg256(i);
     swatch(i, 4);
   }
@@ -90,6 +92,9 @@ int main(void) {
     for (j = 0; j < 3; j++) {
       for (i = 0; i < 6; i++) {
         int idx = 16 + 72 * j + (6 * (k < 6 ? k : 17 - k)) + i;
+        int g = k < 6 ? k : 12 - k, r = j * 2 + (k > 6);
+        int lum = r * 3 + g * 10 + i; /* quick 'n' dirty std luminance */
+        sgr(lum > 30 ? 30 : 37);
         bg256(idx);
         swatch(idx, 4);
       }
@@ -100,6 +105,7 @@ int main(void) {
     indent(1);
     for (j = 0; j < 12; j++) {
       int idx = 232 + 12 * i + j;
+      sgr(i ? 30 : 37);
       bg256(idx);
       swatch(idx, 6);
     }
