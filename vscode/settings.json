@@ -1,5 +1,4 @@
 {
-    "clang-format.executable": "C:\\msys64\\mingw64\\bin\\clang-format.exe",
     "editor.formatOnSave": true,
     "terminal.integrated.fontFamily": "\"MesloLGMDZ Nerd Font Mono\"",
     "[c]": {

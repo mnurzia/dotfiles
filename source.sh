@@ -41,7 +41,7 @@ reap() {
 }
 
 # ls aliases
-alias ls="ls --color=auto"
+alias ls="ls --color=auto --classify=auto"
 alias l="ls"
 alias ll="ls -l"
 alias lal="ls -al"
@@ -73,6 +73,8 @@ alias gs="git status"
 #   export EDITOR=nvim
 #   export GIT_EDITOR=nvim
 # fi
+
+export EDITOR=vim
 
 # vscode integration
 alias vsc=code
