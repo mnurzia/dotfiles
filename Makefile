@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=--std=c89 -Wall -Wpedantic -Werror -Wextra -Wshadow -Iinclude -g
 
-all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington ~/.vimrc bin/keyprobe ~/.config/nvim
+all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington ~/.vimrc bin/keyprobe
 
 bin:
 	mkdir -p bin
@@ -44,12 +44,8 @@ bin/wordington: wordington/wordington.py
 	chmod +x bin/wordington
 
 ~/.vimrc: vimrc
-	ln -s ~/.config/dotfiles/vimrc ~/.vimrc
-
-~/.config/nvim:
-	ln -s ~/.config/dotfiles/nvim ~/.config/nvim
+	ln -fs ~/.config/dotfiles/vimrc ~/.vimrc
 
 clean:
 	rm -rf bin
 	rm -rf ~/.vimrc
-	rm -rf ~/.config/nvim

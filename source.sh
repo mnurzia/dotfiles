@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # default directories (define these outside to override)
 DOTFILES_DIR=${DOTFILES_DIR:-~/.config/dotfiles}
@@ -33,11 +33,16 @@ reset() {
 
 # kill all background processes
 reap() {
-  for job in $(jobs -ps); do
+  for job in $(jobs -l | awk '/(S|s)(topped|uspended)/ { print $2 }'); do
     kill -9 "$job"
   done
   # give prompt a moment to catch up (otherwise SIGCHILD doesn't hit bash til' after prompt)
   sleep 0.1
+}
+
+# inspect parts of $PATH
+showpath() {
+  echo "$PATH" | sed 's/:/\n/g'
 }
 
 # ls aliases
@@ -92,13 +97,14 @@ export HISTSIZE=
 export HISTFILESIZE=
 
 # inputrc modifications
-export INPUTRC=$DOTFILES_DIR/inputrc
+export INPUTRC="$DOTFILES_DIR/inputrc"
 
 # pass mods
 export PASSWORD_STORE_ENABLE_EXTENSIONS=true
 passhow() {
   pass show "$(find ~/.password-store -name '*.gpg' | sed -e "s:$PASS_DIR/::gi" -e "s:.gpg$::gi" | fzf)"
 }
+alias passshow=passhow
 
 # note taking
 notes() {
@@ -116,7 +122,26 @@ _prompt () {
   PS1="$("$DOTFILES_DIR"/bin/prompt -x $_PROMPT_EXIT_STATUS -j "$(jobs | wc -l)")"
 }
 
-export PYTHONSTARTUP=$DOTFILES_DIR/pythonrc
+# pythonrc
+export PYTHONSTARTUP="$DOTFILES_DIR/pythonrc"
+
+# open man page in browser
+bman () (
+  MAN_PAGE="$(man -w " $1 ")"
+  case "$MAN_PAGE" in
+    *.gz) # need to unzip man pages ending in .gz
+      FILTER="gunzip"
+      ;;
+    *)
+      FILTER="cat"
+      ;;
+  esac
+  MAN_TMP="$(mktemp)"
+  "$FILTER" < "$MAN_PAGE" | groff -t -e -mandoc -Thtml > "$MAN_TMP"
+  firefox "$MAN_TMP"
+  sleep 0.5
+  rm -f "$MAN_TMP"
+)
 
 # signifies correct loading
 fetch
