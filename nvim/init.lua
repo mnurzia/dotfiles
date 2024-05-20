@@ -125,7 +125,7 @@ require("lazy").setup(
           highlight_git = "all" -- dim out .gitignored files
         }
       },
-      config = function()
+      init = function()
         -- disable netrw for nvim-tree
         vim.g.loaded_netrw = 1
         vim.g.loaded_netrwPlugin = 1
