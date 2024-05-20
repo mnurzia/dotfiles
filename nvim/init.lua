@@ -1,10 +1,4 @@
--- disable netrw for nvim-tree
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
-
--- set completeopt for nvim-cmp
-vim.opt.completeopt = { 'menu', 'menuone', 'noselect' }
-
+-- set this variable to change color scheme
 local colorscheme = "vscode"
 
 -- bootstrap lazy.nvim
@@ -22,11 +16,54 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- register keybindings
+local function keys()
+  local wk = require("which-key")
+
+  wk.register({
+    mode = 'n',
+    -- bind C-H to open WhichKey
+    ["<C-H>"] = { "<cmd>WhichKey<cr>", "which-key: Open" },
+    -- bind backslash to open tree-sitter search
+    ["\\"] = { function()
+      require("flash").treesitter_search()
+    end, "Flash: tree-sitter search" },
+    -- bind ]g and [g to goto errors
+    ["[g"] = { function()
+      vim.diagnostic.goto_next()
+    end, "Go to next diagnostic" },
+    ["]g"] = { function()
+      vim.diagnostic.goto_prev()
+    end, "Go to previous diagnostic" }
+  })
+end
+
+-- format on save
+vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
+
+-- use two tabs
+vim.cmd [[set tabstop=2]]
+vim.cmd [[set shiftwidth=2]]
+vim.cmd [[set expandtab]]
+
+-- show line numbers in insert mode and relative line numbers in other modes
+vim.cmd [[set number]]
+vim.cmd [[set relativenumber]]
+vim.cmd [[autocmd InsertEnter * :set norelativenumber]]
+vim.cmd [[autocmd InsertLeave * :set relativenumber]]
+
+-- highlight the line the cursor is on
+vim.cmd [[set cursorline]]
+
+-- always show the sign/problems column instead of only when there are problems
+vim.cmd [[set signcolumn=yes]]
+
 require("lazy").setup(
   {
     {
+      -- simple profiler (run nvim with NVIM_PROFILE=1)
       'stevearc/profile.nvim',
-      init = function()
+      config = function()
         local should_profile = os.getenv("NVIM_PROFILE")
         if should_profile then
           require("profile").instrument_autocmds()
@@ -55,59 +92,88 @@ require("lazy").setup(
         vim.keymap.set("", "<f2>", toggle_profile)
       end
     },
-    'nvim-tree/nvim-web-devicons',
     {
-      'nvim-lualine/lualine.nvim',
-      dependencies = { 'nvim-tree/nvim-web-devicons' },
-      opts = { options = { component_separators = { left = '', right = '' }, section_separators = { left = '', right = '' } } }
+      -- devicon support for nvim-tree
+      'nvim-tree/nvim-web-devicons'
     },
     {
-      "nvim-tree/nvim-tree.lua",
+      -- lua statusline support
+      'nvim-lualine/lualine.nvim',
       dependencies = { 'nvim-tree/nvim-web-devicons' },
       opts = {
-        git = {
-          enable = true,
-          ignore = false,
-          timeout = 400
-        },
-        renderer = {
-          highlight_git = "all"
+        options = {
+          component_separators = {
+            left = '', right = '' -- don't use powerline symbols
+          },
+          section_separators = {
+            left = '', right = '' -- don't use powerline symbols
+          }
         }
       }
     },
     {
+      -- vscode-like tree plugin
+      "nvim-tree/nvim-tree.lua",
+      dependencies = { 'nvim-tree/nvim-web-devicons' },
+      opts = {
+        git = {
+          enable = true,  -- enable git support
+          ignore = false, -- don't hide .gitignored files
+          timeout = 400
+        },
+        renderer = {
+          highlight_git = "all" -- dim out .gitignored files
+        }
+      },
+      config = function()
+        -- disable netrw for nvim-tree
+        vim.g.loaded_netrw = 1
+        vim.g.loaded_netrwPlugin = 1
+      end
+    },
+    {
+      -- documentation and help for key bindings
       "folke/which-key.nvim",
       event = "VeryLazy",
       init = function()
         vim.o.timeout = true
         vim.o.timeoutlen = 300
+        keys()
       end,
       opts = {}
     },
     {
+      -- snippet engine
       "L3MON4D3/LuaSnip",
       version = "v2.*"
     },
-    "onsails/lspkind.nvim",
     {
+      -- symbol type icons for completions
+      "onsails/lspkind.nvim"
+    },
+    {
+      -- code completion and suggestions
       "hrsh7th/nvim-cmp",
       dependencies = { "L3MON4D3/LuaSnip", "onsails/lspkind.nvim" },
       config = function()
         local cmp = require('cmp')
         local luasnip = require('luasnip')
         local lspkind = require('lspkind')
+        -- set completeopt for nvim-cmp
+        vim.opt.completeopt = { 'menu', 'menuone', 'noselect' }
         cmp.setup({
           snippet = {
             expand = function(args)
+              -- use luasnip to expand snippets
               require('luasnip').lsp_expand(args.body)
             end,
           },
           mapping = cmp.mapping.preset.insert({
-            ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-            ['<C-f>'] = cmp.mapping.scroll_docs(4),
-            ['<C-Space>'] = cmp.mapping.complete(),
-            ['<C-e>'] = cmp.mapping.abort(),
-            ['<CR>'] = cmp.mapping(function(fallback)
+            ['<C-b>'] = cmp.mapping.scroll_docs(-4),  -- scroll docs up
+            ['<C-f>'] = cmp.mapping.scroll_docs(4),   -- scroll docs down
+            ['<C-Space>'] = cmp.mapping.complete(),   -- complete unconditionally
+            ['<C-e>'] = cmp.mapping.abort(),          -- abort completion
+            ['<CR>'] = cmp.mapping(function(fallback) -- complete snippet
               if cmp.visible() then
                 if luasnip.expandable() then
                   luasnip.expand()
@@ -121,7 +187,7 @@ require("lazy").setup(
               end
             end),
 
-            ["<Tab>"] = cmp.mapping(function(fallback)
+            ["<Tab>"] = cmp.mapping(function(fallback) -- use tab to move thru snippet
               if cmp.visible() then
                 cmp.select_next_item()
               elseif luasnip.locally_jumpable(1) then
@@ -131,7 +197,7 @@ require("lazy").setup(
               end
             end, { "i", "s" }),
 
-            ["<S-Tab>"] = cmp.mapping(function(fallback)
+            ["<S-Tab>"] = cmp.mapping(function(fallback) -- use shift-tab to move back thru snippet
               if cmp.visible() then
                 cmp.select_prev_item()
               elseif luasnip.locally_jumpable(-1) then
@@ -142,13 +208,13 @@ require("lazy").setup(
             end, { "i", "s" }),
           }),
           sources = cmp.config.sources({
-            { name = 'nvim_lsp' },
-            { name = 'snippy' },
+            { name = 'nvim_lsp' }, -- provide lsp completions
+            { name = 'luasnip' },  -- provide luasnip completions
           }, {
-            { name = 'buffer' },
+            { name = 'buffer' },   -- buffer completions have lower priority
           }),
           formatting = {
-            format = lspkind.cmp_format({
+            format = lspkind.cmp_format({ -- use lspkind to add nice symbol icons
               mode = 'symbol',
               maxwidth = 50,
               ellipsis_char = '...',
@@ -158,24 +224,46 @@ require("lazy").setup(
         })
       end
     },
-    { "hrsh7th/cmp-nvim-lsp", dependencies = { "hrsh7th/nvim-cmp" }
+    {
+      -- plugs lsp into our nvim-cmp
+      "hrsh7th/cmp-nvim-lsp",
+      dependencies = { "hrsh7th/nvim-cmp" }
     },
     {
+      -- autoconfigure lsp servers
       "neovim/nvim-lspconfig",
       dependencies = { "hrsh7th/cmp-nvim-lsp" },
       config = function()
-        require("lspconfig").clangd.setup
+        require("lspconfig").clangd.setup -- clangd (C/C++)
         {
           capabilities = require('cmp_nvim_lsp').default_capabilities()
         }
-        require("lspconfig").lua_ls.setup
+        require("lspconfig").lua_ls.setup -- lua_ls (Lua)
         {
-          settings = { Lua = { diagnostics = { globals = { 'vim' } }, format = { enable = true, defaultConfig = { indent_style = "space", indent_size = "2", max_line_length = "120" } } } }
+          capabilities = require('cmp_nvim_lsp').default_capabilities(),
+          settings = {
+            Lua = {
+              diagnostics = {
+                globals = { 'vim' } -- predefined global variables
+              },
+              format = {            -- EmmyCodeStyle formatter settings
+                enable = true,
+                defaultConfig = {
+                  indent_style = "space",
+                  indent_size = "2",
+                  max_line_length = "120"
+                }
+              }
+            }
+          }
         }
-        require("lspconfig").pyright.setup {}
+        require("lspconfig").pyright.setup { -- pyright (Python)
+          capabilities = require('cmp_nvim_lsp').default_capabilities()
+        }
       end
     },
     {
+      -- show signatures when writing function arguments
       "ray-x/lsp_signature.nvim",
       event = "VeryLazy",
       opts = {
@@ -188,17 +276,32 @@ require("lazy").setup(
           border = "none"
         },
       },
-      config = function(_, opts)
-        require("lsp_signature").setup(opts)
-      end
     },
     {
+      -- quickly jump around using keys
       "folke/flash.nvim",
-      opts = { modes = { search = { enabled = true } } }
-    },
-    { "m4xshen/hardtime.nvim", dependencies = { "MunifTanjim/nui.nvim", "nvim-lua/plenary.nvim" }, opts = {}
+      dependencies = {
+        "nvim-treesitter/nvim-treesitter",
+      },
+      opts = {
+        modes = {
+          search = {
+            enabled = true
+          }
+        }
+      }
     },
     {
+      -- disable usage of arrow keys (force good vim ettiquette)
+      "m4xshen/hardtime.nvim",
+      dependencies = {
+        "MunifTanjim/nui.nvim",
+        "nvim-lua/plenary.nvim"
+      },
+      opts = {}
+    },
+    {
+      -- use vscode color scheme
       "Mofiqul/vscode.nvim",
       opts = {
         style = 'dark',
@@ -212,29 +315,23 @@ require("lazy").setup(
       end
     },
     {
-      "projekt0n/github-nvim-theme",
-      lazy = false,
-      priority = 1000,
-      config = function()
-        require('github-theme').setup({
-          options = {
-            styles = {
-              comments = 'italic'
-            }
-          },
-          groups = {
-            all = {
-              CursorLine = { bg = '#34393f' }
-            }
-          }
-        })
-        -- vim.cmd.colorscheme('github_dark_default')
-      end,
+      -- automatically insert pairs of (), [], etc.
+      "windwp/nvim-autopairs",
+      event = "InsertEnter",
+      opts = {}
     },
-    { "windwp/nvim-autopairs",           event = "InsertEnter", config = true },
-    { "lewis6991/gitsigns.nvim",         opts = {} },
-    { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
     {
+      -- show git status in signcolumn
+      "lewis6991/gitsigns.nvim",
+      opts = {}
+    },
+    {
+      -- tree-sitter support (used by flash)
+      "nvim-treesitter/nvim-treesitter",
+      build = ":TSUpdate"
+    },
+    {
+      -- preview markdown in firefox
       "iamcco/markdown-preview.nvim",
       cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
       ft = { "markdown" },
@@ -243,43 +340,3 @@ require("lazy").setup(
   },
   { install = { colorscheme = { colorscheme } }
   })
-
-
--- format on save
-vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
-
--- use two tabs
-vim.cmd [[set tabstop=2]]
-vim.cmd [[set shiftwidth=2]]
-vim.cmd [[set expandtab]]
-vim.cmd [[set number]]
-vim.cmd [[set relativenumber]]
-vim.cmd [[set cursorline]]
-vim.cmd [[set signcolumn=yes]]
-vim.cmd [[autocmd InsertEnter * :set norelativenumber]]
-vim.cmd [[autocmd InsertLeave * :set relativenumber]]
-
--- bind ]g and [g to goto errors
--- vim.keymap.set("n", "]g", vim.diagnostic.goto_next)
--- vim.keymap.set("n", "[g", vim.diagnostic.goto_prev)
-
-local wk = require("which-key")
-
-wk.register({
-  mode = 'n',
-  ["<C-H>"] = { "<cmd>WhichKey<cr>", "which-key: Open" },
-  ["\\"] = { function()
-    require("flash").treesitter_search()
-  end, "Flash: tree-sitter search" },
-  ["[g"] = { function()
-    vim.diagnostic.goto_next()
-  end, "Go to next diagnostic" },
-  ["]g"] = { function()
-    vim.diagnostic.goto_prev()
-  end, "Go to previous diagnostic" }
-})
-
--- bind backslash to open flash in treesitter mode
--- vim.keymap.set("n", "\\", function()
---   require("flash").treesitter()
--- end)
