@@ -345,6 +345,12 @@ require("lazy").setup({
     build = ":TSUpdate",
   },
   {
+    -- show context lines at the top of screen for code blocks
+    "nvim-treesitter/nvim-treesitter-context",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    opts = {},
+  },
+  {
     -- preview markdown in firefox
     "iamcco/markdown-preview.nvim",
     cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
@@ -367,5 +373,17 @@ require("lazy").setup({
         lsp_fallback = false,
       },
     },
+  },
+  {
+    -- show indentation level as a line
+    "nvimdev/indentmini.nvim",
+    opts = {
+      char = "┇",
+    },
+    config = function(_, opts)
+      require("indentmini").setup(opts)
+      vim.cmd("highlight! link IndentLineCurrent FoldColumn")
+      vim.cmd("highlight! link IndentLine VertSplit")
+    end,
   },
 }, { install = { colorscheme = { colorscheme } } })

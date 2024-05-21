@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=--std=c89 -Wall -Wpedantic -Werror -Wextra -Wshadow -Iinclude -g
 
-all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington bin/keyprobe ~/.config/tmux ~/.config/nvim
+all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington bin/keyprobe bin/wgpro ~/.config/tmux ~/.config/nvim
 
 bin:
 	mkdir -p bin
@@ -42,6 +42,10 @@ bin/cprec: cprec/cprec.c
 bin/wordington: wordington/wordington.py
 	cp wordington/wordington.py bin/wordington
 	chmod +x bin/wordington
+
+bin/wgpro: wgpro/wgpro.py
+	cp wgpro/wgpro.py bin/wgpro
+	chmod +x bin/wgpro
 
 ~/.config/tmux: tmux/tmux.conf
 	ln -sf $(shell realpath ./tmux) $@

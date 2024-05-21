@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from argparse import ArgumentParser, FileType, Namespace
 from glob import glob
 from pathlib import Path
@@ -62,6 +63,7 @@ def cmd_list(parser: ArgumentParser, args: Namespace) -> int:
         print(f"{peer}")
     return 0
 
+
 def cmd_add(parser: ArgumentParser, args: Namespace) -> int:
     cfg = Cfg(args.config)
     if args.name in cfg.get_peers():
@@ -104,6 +106,7 @@ def cmd_add(parser: ArgumentParser, args: Namespace) -> int:
     cfg.save()
     return 0
 
+
 def cmd_remove(parser: ArgumentParser, args: Namespace) -> int:
     cfg = Cfg(args.config)
     if args.name not in cfg.get_peers():
@@ -114,6 +117,7 @@ def cmd_remove(parser: ArgumentParser, args: Namespace) -> int:
         rmtree(Path(cfg.get("Config", "ClientsDir")) / args.name)
     return 0
 
+
 def cmd_conf(parser: ArgumentParser, args: Namespace) -> int:
     cfg = Cfg(args.config)
     for peer_name in cfg.get_peers():
@@ -123,6 +127,7 @@ def cmd_conf(parser: ArgumentParser, args: Namespace) -> int:
         print(f"AllowedIPs={cfg.get(peer_cfg, "Addresses")}")
         print()
     return 0
+
 
 def main(args: list[str]) -> int:
     parser = ArgumentParser()
@@ -139,7 +144,9 @@ def main(args: list[str]) -> int:
     parser_add = subs.add_parser("remove", help="delete a profile")
     parser_add.set_defaults(cmd=cmd_remove)
     parser_add.add_argument("name", type=str, help="name of the profile to remove")
-    parser_add.add_argument("--hard", action="store_true", help="remove data from clients directory too")
+    parser_add.add_argument(
+        "--hard", action="store_true", help="remove data from clients directory too"
+    )
 
     parser_conf = subs.add_parser(
         "conf", help="get the wireguard configuration to be used by `wg addconf`"
