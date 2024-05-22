@@ -402,7 +402,7 @@ require("lazy").setup({
     -- show indentation level as a line
     "nvimdev/indentmini.nvim",
     opts = {
-      char = "┇",
+      char = "┆",
     },
     config = function(_, opts)
       require("indentmini").setup(opts)
