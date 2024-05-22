@@ -46,7 +46,7 @@ local function keys()
   })
 end
 
--- format on save
+-- format on save (handled by stevearc/conform.nvim)
 -- vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
 
 -- use two tabs
@@ -65,6 +65,13 @@ vim.cmd([[set cursorline]])
 
 -- always show the sign/problems column instead of only when there are problems
 vim.cmd([[set signcolumn=yes]])
+
+-- speed up python file opening by giving nvim's python provider an explicit
+-- path
+vim.g.python3_host_prog = "~/..pyenv/shims/python3"
+
+-- update diagnostics while in insert mode
+vim.diagnostic.config({ update_in_insert = true })
 
 require("lazy").setup({
   {
@@ -343,6 +350,23 @@ require("lazy").setup({
     -- tree-sitter support (used by flash)
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
+    opts = {},
+    init = function()
+      require("nvim-treesitter.configs").setup({
+        -- ensure that these languages have TS binaries installed
+        ensure_installed = { "c", "lua", "python" },
+        -- install them asynchronously (don't hang)
+        sync_install = false,
+        -- don't automatically install parsers for new langs
+        auto_install = false,
+        highlight = {
+          -- enable syntax highlighting
+          enable = true,
+          -- don't run vim's syntax highlighting at the same time
+          additional_vim_regex_highlighting = false,
+        },
+      })
+    end,
   },
   {
     -- show context lines at the top of screen for code blocks
@@ -382,8 +406,13 @@ require("lazy").setup({
     },
     config = function(_, opts)
       require("indentmini").setup(opts)
-      vim.cmd("highlight! link IndentLineCurrent FoldColumn")
+      vim.cmd("highlight! IndentLineCurrent guifg=#999999")
       vim.cmd("highlight! link IndentLine VertSplit")
     end,
+  },
+  {
+    -- show progress for LSP loading (good for python)
+    "j-hui/fidget.nvim",
+    opts = {},
   },
 }, { install = { colorscheme = { colorscheme } } })

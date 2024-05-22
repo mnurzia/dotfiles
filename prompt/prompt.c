@@ -17,9 +17,10 @@
 #include <aparse.h>
 
 /* Get value of MSYSTEM environment variable. If unavailable, return NULL. */
-const char *get_msystem(void) {
+const char* get_msystem(void)
+{
   static int detected = -1;
-  static const char *msystem = NULL;
+  static const char* msystem = NULL;
   if (detected == -1) {
     msystem = getenv("MSYSTEM");
     detected = !!msystem;
@@ -31,7 +32,8 @@ const char *get_msystem(void) {
 int is_msys(void) { return !!get_msystem(); }
 
 /* Are we running on WSL? */
-int is_wsl(void) {
+int is_wsl(void)
+{
   static int detected = -1;
   if (detected == -1) {
     struct utsname u;
@@ -43,24 +45,24 @@ int is_wsl(void) {
   return detected;
 }
 
-#define BRANCH_ICON "\xee\x9c\xa5"
+#define BRANCH_ICON  "\xee\x9c\xa5"
 #define WINDOWS_ICON "\xee\x98\xaa"
-#define GEAR_ICON "\xf3\xb0\x92\x93"
+#define GEAR_ICON    "\xf3\xb0\x92\x93"
 
-#define C_WHITE 15
-#define C_GRAY 245
+#define C_WHITE     15
+#define C_GRAY      245
 #define C_LIGHTGRAY 250
-#define C_RED 9
-#define C_PURPLE 69
+#define C_RED       9
+#define C_PURPLE    69
 #define C_LIGHTBLUE 117
-#define C_LIGHTRED 196
+#define C_LIGHTRED  196
 
 #define SIFY(x) #x
-#define FG(x) "\\[\x1b[38;5;" SIFY(x) "m\\]"
-#define FG_FMT "\\[\x1b[38;5;%im\\]"
-#define ITAL "\\[\x1b[3m\\]"
-#define CLR "\\[\x1b[0m\\]"
-#define SEP " "
+#define FG(x)   "\\[\x1b[38;5;" SIFY(x) "m\\]"
+#define FG_FMT  "\\[\x1b[38;5;%im\\]"
+#define ITAL    "\\[\x1b[3m\\]"
+#define CLR     "\\[\x1b[0m\\]"
+#define SEP     " "
 
 int term_width = 80;
 int term_height = 24;
@@ -69,12 +71,14 @@ int short_fmt = 0;
 
 void print_sep(void) { printf(SEP); }
 
-void end(void) {
+void end(void)
+{
   printf(CLR);
   fflush(stdout);
 }
 
-void print_login_hostname(void) {
+void print_login_hostname(void)
+{
   char *hostname_buf, *username_buf, *first_dot, *color;
   struct passwd pwd, *out;
   int hostname_fg = 105;
@@ -88,29 +92,32 @@ void print_login_hostname(void) {
   color = getenv("PROMPT_USER_COLORS");
   if (color)
     sscanf(color, "%i", &hostname_fg);
-  printf(FG(C_WHITE) "%s" FG(C_GRAY) "@" FG_FMT "%s" CLR SEP, username_buf,
-         hostname_fg, hostname_buf);
+  printf(
+      FG(C_WHITE) "%s" FG(C_GRAY) "@" FG_FMT "%s" CLR SEP, username_buf,
+      hostname_fg, hostname_buf);
   free(hostname_buf);
   free(username_buf);
 }
 
-void print_wd(void) {
+void print_wd(void)
+{
   char *path = malloc(PATH_MAX), *win_drv = NULL, current_path[PATH_MAX],
        *prefix = path, *next, *currp = current_path;
-  DIR *current_dir = NULL;
+  DIR* current_dir = NULL;
   int should_shorten = short_fmt;
   if (!getcwd(path, PATH_MAX)) {
     printf(FG(C_RED) "<unlinked>" CLR SEP);
     return;
-  } else if ((is_wsl() && strstr(path, "/mnt/") == path && path[5] &&
-              (path[6] == '/' || !path[6])) ||
-             (is_msys() && path[1] && (path[2] == '/' || !path[2]))) {
+  } else if (
+      (is_wsl() && strstr(path, "/mnt/") == path && path[5] &&
+       (path[6] == '/' || !path[6])) ||
+      (is_msys() && path[1] && (path[2] == '/' || !path[2]))) {
     /* wsl or msys: backwards slashes, print drive letter */
     path = win_drv + 1;
     printf(FG(C_LIGHTGRAY) "%c:", *win_drv);
   } else {
     /* attempt to match $HOME with string prefix */
-    char *home = getenv("HOME");
+    char* home = getenv("HOME");
     if (!strncmp(home, path, strlen(home))) {
       path = path + strlen(home);
       printf(FG(C_LIGHTGRAY) "~");
@@ -119,8 +126,8 @@ void print_wd(void) {
   strcpy(current_path, prefix);
   currp += path - prefix;
   while (*path) {
-    const char *max_prefix = should_shorten ? path + 1 : NULL;
-    struct dirent *ent;
+    const char* max_prefix = should_shorten ? path + 1 : NULL;
+    struct dirent* ent;
     assert(*path == '/'); /* path is normalized (all segments start with '/') */
     *(currp++) = *(path++); /* pop slash */
     *currp = '\0';
@@ -155,11 +162,23 @@ void print_wd(void) {
     printf(FG(C_GRAY) "%s", (win_drv ? "\\" : "/"));
     {
       size_t num_remaining;
-      if (should_shorten && (num_remaining = next - max_prefix) > 2)
+      if (should_shorten && (num_remaining = next - max_prefix) > 2) {
         /* print shortened segment */
-        printf(FG(C_WHITE) "%.*s" FG(C_GRAY) ITAL "~%u" CLR,
-               (int)(max_prefix - path), path, (unsigned)num_remaining);
-      else
+        char remain_buf[128] = {0};
+        char num_buf[64] = {0}, *num_buf_ptr = num_buf;
+        static const char* sup[] = {
+            "\xe2\x81\xb0", "\xc2\xb9",     "\xc2\xb2",     "\xc2\xb3",
+            "\xe2\x81\xb4", "\xe2\x81\xb5", "\xe2\x81\xb6", "\xe2\x81\xb7",
+            "\xe2\x81\xb8", "\xe2\x81\xb9"};
+        sprintf(num_buf, "%u", (unsigned)num_remaining);
+        while (*num_buf_ptr) {
+          strcat(remain_buf, sup[*num_buf_ptr - '0']);
+          num_buf_ptr++;
+        }
+        printf(
+            FG(C_WHITE) "%.*s" FG(C_GRAY) ITAL "%s" CLR,
+            (int)(max_prefix - path), path, remain_buf);
+      } else
         /* print normal segment */
         printf(FG(C_WHITE) "%.*s" FG(C_GRAY), (int)(next - path), path);
     }
@@ -168,17 +187,20 @@ void print_wd(void) {
   printf(CLR SEP);
 }
 
-void print_exit_status(int exit_code) {
+void print_exit_status(int exit_code)
+{
   printf(FG(C_RED) "%i" CLR SEP, exit_code);
 }
 
-void print_hash(void) {
+void print_hash(void)
+{
   printf("%s" CLR SEP, (getuid() == 0) ? FG(C_LIGHTRED) "#" : FG(C_WHITE) "$");
 }
 
-void print_msystem(void) {
-  const char *msystem = NULL;
-  const char *short_msystem = NULL;
+void print_msystem(void)
+{
+  const char* msystem = NULL;
+  const char* short_msystem = NULL;
   if (!(msystem = get_msystem()))
     return;
   if (!strcmp(msystem, "CLANG32"))
@@ -201,14 +223,16 @@ void print_msystem(void) {
   printf(FG(C_PURPLE) "%s" WINDOWS_ICON CLR SEP, short_msystem);
 }
 
-void print_job_count(int job_count) {
+void print_job_count(int job_count)
+{
   if (job_count)
     printf(FG(C_PURPLE) "%i" GEAR_ICON CLR SEP, job_count);
 }
 
-void print_git_branch(void) {
+void print_git_branch(void)
+{
   char *wd = malloc(PATH_MAX), *wd_buf = wd;
-  char *path_buf = malloc(PATH_MAX);
+  char* path_buf = malloc(PATH_MAX);
   int git_rank = 0;
   char head_ptr_buf[256] = {0};
   assert(wd);
@@ -266,17 +290,19 @@ done:
   free(path_buf);
 }
 
-void get_dims(void) {
+void get_dims(void)
+{
   struct winsize sz;
   if (ioctl(STDIN_FILENO, TIOCGWINSZ, &sz) == -1)
     return;
   term_width = sz.ws_col, term_height = sz.ws_row;
 }
 
-int main(int argc, const char *const *argv) {
+int main(int argc, const char* const* argv)
+{
   int exit_code = 0;
   int job_count = 0;
-  ap *parser;
+  ap* parser;
   (void)(argc);
   parser = ap_init(argv[0]);
   ap_opt(parser, 'x', "exit-status");
