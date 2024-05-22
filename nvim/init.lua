@@ -30,18 +30,19 @@ local function keys()
       end,
       "Flash: tree-sitter search",
     },
-    -- bind ]g and [g to goto errors
-    ["[g"] = {
-      function()
-        vim.diagnostic.goto_next()
-      end,
-      "Go to next diagnostic",
+    ["D"] = {
+      ["s"] = {
+        function()
+          vim.diagnostic.open_float()
+        end,
+        "Open diagnostic popup",
+      },
     },
-    ["]g"] = {
+    ["<F2>"] = {
       function()
-        vim.diagnostic.goto_prev()
+        vim.lsp.buf.rename()
       end,
-      "Go to previous diagnostic",
+      "LSP: Rename",
     },
   })
 end
