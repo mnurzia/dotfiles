@@ -102,7 +102,7 @@ void print_login_hostname(void)
 void print_wd(void)
 {
   char *path = malloc(PATH_MAX), *win_drv = NULL, current_path[PATH_MAX],
-       *prefix = path, *next, *currp = current_path;
+       *prefix = path, *next;
   DIR* current_dir = NULL;
   int should_shorten = short_fmt;
   if (!getcwd(path, PATH_MAX)) {
@@ -124,13 +124,13 @@ void print_wd(void)
     }
   }
   strcpy(current_path, prefix);
-  currp += path - prefix;
   while (*path) {
     const char* max_prefix = should_shorten ? path + 1 : NULL;
     struct dirent* ent;
     assert(*path == '/'); /* path is normalized (all segments start with '/') */
-    *(currp++) = *(path++); /* pop slash */
-    *currp = '\0';
+    path++; /* pop slash */
+    memset(current_path, 0, sizeof(current_path));
+    memcpy(current_path, prefix, path - prefix);
     if (should_shorten) {
       current_dir = opendir(current_path);
       if (!current_dir) {
@@ -158,15 +158,18 @@ void print_wd(void)
         }
       }
     }
-    next = (next = strchr(path, '/')) ? next : path + strlen(path);
+    next = strchr(path, '/');
+    if (!next)
+      next = path + strlen(path);
     printf(FG(C_GRAY) "%s", (win_drv ? "\\" : "/"));
     {
       size_t num_remaining;
-      if (should_shorten && (num_remaining = next - max_prefix) > 2) {
+      if (should_shorten && (num_remaining = next - max_prefix) > 1) {
         /* print shortened segment */
         char remain_buf[128] = {0};
         char num_buf[64] = {0}, *num_buf_ptr = num_buf;
         static const char* sup[] = {
+            /* unicode superscripts 0-9 */
             "\xe2\x81\xb0", "\xc2\xb9",     "\xc2\xb2",     "\xc2\xb3",
             "\xe2\x81\xb4", "\xe2\x81\xb5", "\xe2\x81\xb6", "\xe2\x81\xb7",
             "\xe2\x81\xb8", "\xe2\x81\xb9"};
