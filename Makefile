@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=--std=c89 -Wall -Wpedantic -Werror -Wextra -Wshadow -Iinclude -g
 
-all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/fetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington bin/keyprobe bin/wgpro ~/.config/tmux ~/.config/nvim
+all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/mfetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington bin/keyprobe bin/wgpro ~/.config/tmux ~/.config/nvim
 
 bin:
 	mkdir -p bin
@@ -20,8 +20,8 @@ bin/get_ip6: get_ip6/get_ip6.sh
 	cp get_ip6/get_ip6.sh bin/get_ip6
 	chmod +x bin/get_ip6
 
-bin/fetch: fetch/fetch.c
-	$(CC) $(CFLAGS) fetch/fetch.c -o bin/fetch
+bin/mfetch: mfetch/mfetch.c
+	$(CC) $(CFLAGS) mfetch/mfetch.c -o bin/mfetch
 
 bin/name_weight: name_weight/name_weight.py
 	cp name_weight/name_weight.py bin/name_weight

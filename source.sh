@@ -156,4 +156,4 @@ then
 fi
 
 # signifies correct loading
-fetch
+mfetch
