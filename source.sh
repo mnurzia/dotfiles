@@ -149,10 +149,10 @@ bman () (
   rm -f "$MAN_TMP"
 )
 
-TMUX_COMPLETION_DIR=$DOTFILES_DIR/tmux/tmux-bash-completion
-if test -d "$TMUX_COMPLETION_DIR"
+TMUX_COMPLETION=$DOTFILES_DIR/tmux/tmux-bash-completion/completions/tmux
+if test -e "$TMUX_COMPLETION"
 then
-  source $DOTFILES_DIR/tmux/tmux-bash-completion/completions/tmux
+  source "$TMUX_COMPLETION" 
 fi
 
 # signifies correct loading
