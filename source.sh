@@ -143,5 +143,7 @@ bman () (
   rm -f "$MAN_TMP"
 )
 
+source tmux/tmux-bash-completion/bash_completion_tmux.sh
+
 # signifies correct loading
 fetch

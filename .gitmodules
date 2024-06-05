@@ -1,0 +1,6 @@
+[submodule "tmux/tmux-bash-completion"]
+	path = tmux/tmux-bash-completion
+	url = https://github.com/imomaliev/tmux-bash-completion
+[submodule "tmux/--force"]
+	path = tmux/--force
+	url = https://github.com/imomaliev/tmux-bash-completion

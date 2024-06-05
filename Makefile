@@ -48,10 +48,10 @@ bin/wgpro: wgpro/wgpro.py
 	chmod +x bin/wgpro
 
 ~/.config/tmux: tmux/tmux.conf
-	ln -sf $(shell realpath ./tmux) $@
+	ln -sf "$$(realpath ./tmux)" $@
 
 ~/.config/nvim: nvim/init.lua
-	ln -sf $(shell realpath ./nvim) $@
+	ln -sf "$$(realpath ./nvim)" $@
 
 clean:
 	rm -rf bin
