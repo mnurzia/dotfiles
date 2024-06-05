@@ -46,7 +46,13 @@ showpath() {
 }
 
 # ls aliases
-alias ls="ls --color=auto --classify=auto"
+case :$(uname -a):
+  in 
+  *BSD*) # already added to path
+    alias ls="ls --color=auto";;
+  *) 
+    alias ls="ls --color=auto --classify=auto";;
+esac
 alias l="ls"
 alias ll="ls -l"
 alias lal="ls -al"
@@ -143,7 +149,7 @@ bman () (
   rm -f "$MAN_TMP"
 )
 
-source tmux/tmux-bash-completion/bash_completion_tmux.sh
+source $DOTFILES_DIR/tmux/tmux-bash-completion/completions/tmux
 
 # signifies correct loading
 fetch
