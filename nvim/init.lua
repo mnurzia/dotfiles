@@ -40,9 +40,13 @@ local function keys()
     },
     ["<F2>"] = {
       function()
-        vim.lsp.buf.rename()
+        require("renamer").rename()
       end,
       "LSP: Rename",
+    },
+    ["<F4>"] = {
+      "<cmd>Telescope lsp_document_symbols<cr>",
+      "LSP: Go to Symbol...",
     },
   })
 end
@@ -174,7 +178,11 @@ require("lazy").setup({
   {
     -- code completion and suggestions
     "hrsh7th/nvim-cmp",
-    dependencies = { "L3MON4D3/LuaSnip", "onsails/lspkind.nvim" },
+    dependencies = {
+      "L3MON4D3/LuaSnip",
+      "onsails/lspkind.nvim",
+      "hrsh7th/cmp-nvim-lsp-signature-help",
+    },
     config = function()
       local cmp = require("cmp")
       local luasnip = require("luasnip")
@@ -236,6 +244,7 @@ require("lazy").setup({
         sources = cmp.config.sources({
           { name = "nvim_lsp" }, -- provide lsp completions
           { name = "luasnip" }, -- provide luasnip completions
+          { name = "nvim_lsp_signature_help" }, -- show signature help
         }, {
           { name = "buffer" }, -- buffer completions have lower priority
         }),
@@ -282,6 +291,7 @@ require("lazy").setup({
     -- show signatures when writing function arguments
     "ray-x/lsp_signature.nvim",
     event = "VeryLazy",
+    enabled = false,
     opts = {
       bind = true,
       doc_lines = 0,
@@ -414,6 +424,15 @@ require("lazy").setup({
   {
     -- show progress for LSP loading (good for python)
     "j-hui/fidget.nvim",
+    opts = {},
+  },
+  {
+    "nvim-telescope/telescope.nvim",
+    tag = "0.1.6",
+    dependencies = { "nvim-lua/plenary.nvim" },
+  },
+  {
+    "filipdutescu/renamer.nvim",
     opts = {},
   },
 }, { install = { colorscheme = { colorscheme } } })
