@@ -6,12 +6,12 @@ PASS_DIR=${PASS_DIR:-~/.password-store}
 NOTES_DIR=${NOTES_DIR:-~/Documents/notes}
 
 # install custom binaries into PATH
-case :$PATH:
-  in 
-  *:$DOTFILES_DIR/bin:*) # already added to path
-    ;;
-  *) 
-    PATH="$PATH:$DOTFILES_DIR/bin";;
+case :$PATH: in
+*:$DOTFILES_DIR/bin:*) # already added to path
+  ;;
+*)
+  PATH="$PATH:$DOTFILES_DIR/bin"
+  ;;
 esac
 
 # reload/rebuild configuration
@@ -46,12 +46,12 @@ showpath() {
 }
 
 # ls aliases
-case :$(uname -a):
-  in 
-  *BSD*) # already added to path
-    alias ls="ls --color=auto";;
-  *) 
-    alias ls="ls --color=auto --classify=auto";;
+case :$(uname -a): in
+*BSD*) # already added to path
+  alias ls="ls --color=auto" ;;
+*)
+  alias ls="ls --color=auto --classify=auto"
+  ;;
 esac
 alias l="ls"
 alias ll="ls -l"
@@ -62,12 +62,12 @@ alias la="ls -a"
 alias up="cd .."
 
 # cd into the most recently modified directory (useful for grading)
-recent () {
+recent() {
   cd "$(find . -mindepth 1 -maxdepth 1 -type d -printf "%T+\t%p\n" | sort | head -n1 | cut -s -f2)" || return
 }
 
 # generate a random port number for a network service
-randport () {
+randport() {
   shuf -i 1024-49151 | head -n1
 }
 
@@ -89,9 +89,9 @@ export EDITOR=vim
 
 # vscode integration
 alias vsc=code
-vsc_pipe () {
+vsc_pipe() {
   tmp=$(mktemp)
-  cat -- > "$tmp"
+  cat -- >"$tmp"
   vsc "$tmp"
   # give vsc a cuppa seconds to load it up
   sleep 1.5
@@ -122,7 +122,7 @@ git config --global user.email "7797957+mnurzia@users.noreply.github.com"
 
 # prompt setup
 PROMPT_COMMAND=_prompt
-_prompt () {
+_prompt() {
   _PROMPT_EXIT_STATUS=$?
   history -a
   PS1="$("$DOTFILES_DIR"/bin/prompt -x $_PROMPT_EXIT_STATUS -j "$(jobs | wc -l)")"
@@ -132,27 +132,28 @@ _prompt () {
 export PYTHONSTARTUP="$DOTFILES_DIR/pythonrc"
 
 # open man page in browser
-bman () (
-  MAN_PAGE="$(man -w " $1 ")"
+bman() (
+  MAN_PAGE="$(man -w "$1")"
   case "$MAN_PAGE" in
-    *.gz) # need to unzip man pages ending in .gz
-      FILTER="gunzip"
-      ;;
-    *)
-      FILTER="cat"
-      ;;
+  *.gz) # need to unzip man pages ending in .gz
+    FILTER="gunzip"
+    ;;
+  *)
+    FILTER="cat"
+    ;;
   esac
   MAN_TMP="$(mktemp)"
-  "$FILTER" < "$MAN_PAGE" | groff -t -e -mandoc -Thtml > "$MAN_TMP"
+  "$FILTER" <"$MAN_PAGE" | groff -t -e -mandoc -Thtml >"$MAN_TMP"
   firefox "$MAN_TMP"
   sleep 0.5
   rm -f "$MAN_TMP"
 )
 
+# tmux completion support
 TMUX_COMPLETION=$DOTFILES_DIR/tmux/tmux-bash-completion/completions/tmux
-if test -e "$TMUX_COMPLETION"
-then
-  source "$TMUX_COMPLETION" 
+if test -e "$TMUX_COMPLETION"; then
+  # shellcheck source=tmux/tmux-bash-completion/completions/tmux
+  . "$TMUX_COMPLETION"
 fi
 
 # signifies correct loading

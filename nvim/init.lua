@@ -285,6 +285,9 @@ require("lazy").setup({
       require("lspconfig").pyright.setup({ -- pyright (Python)
         capabilities = require("cmp_nvim_lsp").default_capabilities(),
       })
+      require("lspconfig").bashls.setup({ -- bash-language-server (shell dialects)
+        capabilities = require("cmp_nvim_lsp").default_capabilities(),
+      })
     end,
   },
   {
@@ -349,8 +352,18 @@ require("lazy").setup({
   {
     -- automatically insert pairs of (), [], etc.
     "windwp/nvim-autopairs",
+    dependencies = { "hrsh7th/nvim-cmp" },
     event = "InsertEnter",
-    opts = {},
+    config = function()
+      local npairs = require("nvim-autopairs")
+      npairs.setup({
+        check_ts = true,
+        ts_config = {},
+      })
+      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+      local cmp = require("cmp")
+      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+    end,
   },
   {
     -- show git status in signcolumn
@@ -383,7 +396,10 @@ require("lazy").setup({
     -- show context lines at the top of screen for code blocks
     "nvim-treesitter/nvim-treesitter-context",
     dependencies = { "nvim-treesitter/nvim-treesitter" },
-    opts = {},
+    opts = {
+      -- only show five lines of context (usually more than enough)
+      max_lines = 5,
+    },
   },
   {
     -- preview markdown in firefox
