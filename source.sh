@@ -143,7 +143,7 @@ bman() (
     ;;
   esac
   MAN_TMP="$(mktemp)"
-  "$FILTER" <"$MAN_PAGE" | groff -t -e -mandoc -Thtml >"$MAN_TMP"
+  "$FILTER" <"$MAN_PAGE" | groff -t -e -mandoc -Tpdf >"$MAN_TMP"
   firefox "$MAN_TMP"
   sleep 0.5
   rm -f "$MAN_TMP"

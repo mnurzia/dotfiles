@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=--std=c89 -Wall -Wpedantic -Werror -Wextra -Wshadow -Iinclude -g
 
-all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/mfetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington bin/keyprobe bin/wgpro ~/.config/tmux ~/.config/nvim
+all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/mfetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington bin/keyprobe bin/wgpro ~/.config/tmux ~/.config/nvim ~/.inputrc
 
 bin:
 	mkdir -p bin
@@ -52,6 +52,9 @@ bin/wgpro: wgpro/wgpro.py
 
 ~/.config/nvim: nvim/init.lua
 	ln -sfn "$$(realpath ./nvim)" $@
+
+~/.inputrc: inputrc
+	ln -sfn "$$(realpath ./inputrc)" $@
 
 clean:
 	rm -rf bin
