@@ -133,20 +133,21 @@ export PYTHONSTARTUP="$DOTFILES_DIR/pythonrc"
 
 # open man page in browser
 bman() (
-  MAN_PAGE="$(man -w "$1")"
-  case "$MAN_PAGE" in
-  *.gz) # need to unzip man pages ending in .gz
-    FILTER="gunzip"
-    ;;
-  *)
-    FILTER="cat"
-    ;;
-  esac
-  MAN_TMP="$(mktemp)"
-  "$FILTER" <"$MAN_PAGE" | groff -t -e -mandoc -Tpdf >"$MAN_TMP"
-  firefox "$MAN_TMP"
-  sleep 0.5
-  rm -f "$MAN_TMP"
+  if MAN_PAGE="$(man -w "$1")"; then
+    case "$MAN_PAGE" in
+    *.gz) # need to unzip man pages ending in .gz
+      FILTER="gunzip"
+      ;;
+    *)
+      FILTER="cat"
+      ;;
+    esac
+    MAN_TMP="$(mktemp)"
+    "$FILTER" <"$MAN_PAGE" | groff -t -e -mandoc -Tpdf >"$MAN_TMP"
+    firefox "$MAN_TMP"
+    sleep 0.5
+    rm -f "$MAN_TMP"
+  fi
 )
 
 # tmux completion support
