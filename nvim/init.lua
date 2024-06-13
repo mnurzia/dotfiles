@@ -71,9 +71,12 @@ vim.cmd([[set cursorline]])
 -- always show the sign/problems column instead of only when there are problems
 vim.cmd([[set signcolumn=yes]])
 
+-- show an 80 column ruler
+vim.cmd([[set colorcolumn=80]])
+
 -- speed up python file opening by giving nvim's python provider an explicit
 -- path
-vim.g.python3_host_prog = "~/..pyenv/shims/python3"
+vim.g.python3_host_prog = "~/.pyenv/shims/python3"
 
 -- update diagnostics while in insert mode
 vim.diagnostic.config({ update_in_insert = true })
@@ -356,6 +359,8 @@ require("lazy").setup({
     event = "InsertEnter",
     config = function()
       local npairs = require("nvim-autopairs")
+      local Rule = require("nvim-autopairs.rule")
+      local cond = require("nvim-autopairs.conds")
       npairs.setup({
         check_ts = true,
         ts_config = {},
@@ -363,6 +368,23 @@ require("lazy").setup({
       local cmp_autopairs = require("nvim-autopairs.completion.cmp")
       local cmp = require("cmp")
       cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+      local rule2 = function(a1, ins, a2, lang)
+        npairs.add_rule(Rule(ins, ins, lang)
+          :with_pair(function(opts)
+            return a1 .. a2 == opts.line:sub(opts.col - #a1, opts.col + #a2 - 1)
+          end)
+          :with_move(cond.none())
+          :with_cr(cond.none())
+          :with_del(function(opts)
+            local col = vim.api.nvim_win_get_cursor(0)[2]
+            return a1 .. ins .. ins .. a2
+              == opts.line:sub(col - #a1 - #ins + 1, col + #ins + #a2) -- insert only works for #ins == 1 anyway
+          end))
+      end
+      rule2("/", "*", "/", { "c", "cpp" })
+      rule2("/*", " ", "*/", { "c", "cpp" })
+      rule2("/", " ", "/", { "c", "cpp" })
+      npairs.add_rule(Rule("/*", "*/", { "c", "cpp" }))
     end,
   },
   {
@@ -429,7 +451,7 @@ require("lazy").setup({
     -- show indentation level as a line
     "nvimdev/indentmini.nvim",
     opts = {
-      char = "┆",
+      char = "\u{258F}",
     },
     config = function(_, opts)
       require("indentmini").setup(opts)
@@ -450,5 +472,14 @@ require("lazy").setup({
   {
     "filipdutescu/renamer.nvim",
     opts = {},
+  },
+  {
+    "tris203/precognition.nvim",
+    event = "VeryLazy",
+    opts = { highlightColor = { link = "CursorLine" } },
+  },
+  {
+    "lukas-reineke/virt-column.nvim",
+    opts = { char = "\u{258F}", highlight = "VertSplit" },
   },
 }, { install = { colorscheme = { colorscheme } } })
