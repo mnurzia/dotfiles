@@ -133,7 +133,7 @@ export PYTHONSTARTUP="$DOTFILES_DIR/pythonrc"
 
 # open man page in browser
 bman() (
-  if MAN_PAGE="$(man -w "$1")"; then
+  if MAN_PAGE="$(man -w "$@")"; then
     case "$MAN_PAGE" in
     *.gz) # need to unzip man pages ending in .gz
       FILTER="gunzip"

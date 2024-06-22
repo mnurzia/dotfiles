@@ -44,9 +44,33 @@ local function keys()
       end,
       "LSP: Rename",
     },
+    ["<F3>"] = {
+      ["d"] = {
+        "<cmd>Telescope lsp_definitions<cr>",
+        "LSP: Definitions...",
+      },
+      ["r"] = {
+        "<cmd>Telescope lsp_references<cr>",
+        "LSP: References...",
+      },
+      ["i"] = {
+        "<cmd>Telescope lsp_incoming_calls<cr>",
+        "LSP: Incoming Calls...",
+      },
+      ["o"] = {
+        "<cmd>Telescope lsp_outgoing_calls<cr>",
+        "LSP: Outgoing Calls...",
+      },
+      ["a"] = {
+        function()
+          vim.lsp.buf.code_action()
+        end,
+        "LSP: Code Action...",
+      },
+    },
     ["<F4>"] = {
       "<cmd>Telescope lsp_document_symbols<cr>",
-      "LSP: Go to Symbol...",
+      "LSP: Workspace Symbols...",
     },
   })
 end
@@ -72,7 +96,7 @@ vim.cmd([[set cursorline]])
 vim.cmd([[set signcolumn=yes]])
 
 -- show an 80 column ruler
-vim.cmd([[set colorcolumn=80]])
+vim.cmd([[set colorcolumn=81]])
 
 -- speed up python file opening by giving nvim's python provider an explicit
 -- path
@@ -291,6 +315,15 @@ require("lazy").setup({
       require("lspconfig").bashls.setup({ -- bash-language-server (shell dialects)
         capabilities = require("cmp_nvim_lsp").default_capabilities(),
       })
+      require("lspconfig").rust_analyzer.setup({ -- rust_analyzer (rust)
+        settings = {
+          ["rust-analyzer"] = {
+            diagnostics = {
+              enable = true,
+            },
+          },
+        },
+      })
     end,
   },
   {
@@ -481,5 +514,20 @@ require("lazy").setup({
   {
     "lukas-reineke/virt-column.nvim",
     opts = { char = "\u{258F}", highlight = "VertSplit" },
+  },
+  {
+    "NeogitOrg/neogit",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "sindrets/diffview.nvim",
+      "nvim-telescope/telescope.nvim",
+    },
+    config = true,
+  },
+  {
+    "akinsho/bufferline.nvim",
+    version = "*",
+    dependencies = "nvim-tree/nvim-web-devicons",
+    opts = {},
   },
 }, { install = { colorscheme = { colorscheme } } })
