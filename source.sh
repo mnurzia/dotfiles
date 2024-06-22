@@ -63,7 +63,7 @@ alias up="cd .."
 
 # cd into the most recently modified directory (useful for grading)
 recent() {
-  cd "$(find . -mindepth 1 -maxdepth 1 -type d -printf "%T+\t%p\n" | sort | head -n1 | cut -s -f2)" || return
+  cd "$(find . -mindepth 1 -maxdepth 1 -type d -execdir "stat" "-c" "%X %n" "{}" ";" | sort | tail -n1 | cut -d " " -f2)" || return
 }
 
 # generate a random port number for a network service
