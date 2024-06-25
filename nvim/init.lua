@@ -19,6 +19,18 @@ vim.opt.rtp:prepend(lazypath)
 local function keys()
   local wk = require("which-key")
 
+  local function fkey(key)
+    local mods, snum = string.match("<S-F5>", "<([CS]*)-F(%d+)>")
+    local num = tonumber(snum)
+    if string.find(mods, "S") then
+      num = num + 12
+    end
+    if string.find(mods, "C") then
+      num = num + 24
+    end
+    return "<F" .. tostring(num) .. ">"
+  end
+
   wk.register({
     mode = "n",
     -- bind C-H to open WhichKey
@@ -72,16 +84,55 @@ local function keys()
       "<cmd>Telescope lsp_document_symbols<cr>",
       "LSP: Workspace Symbols...",
     },
+    ["<F5>"] = {
+      function()
+        require("dap").continue()
+      end,
+      "DAP: Continue",
+    },
+    [fkey("<S-F5>")] = {
+      function()
+        require("dap").terminate()
+      end,
+      "DAP: Terminate",
+    },
+    ["<F8>"] = {
+      function()
+        require("dap").toggle_breakpoint()
+      end,
+      "DAP: Toggle Breakpoint",
+    },
+    ["<F10>"] = {
+      function()
+        require("dap").step_over()
+      end,
+      "DAP: Step Over",
+    },
+    ["<F11>"] = {
+      function()
+        require("dap").step_into()
+      end,
+      "DAP: Step Into",
+    },
+    ["<F12>"] = {
+      function()
+        require("dap").step_out()
+      end,
+      "DAP: Step Out",
+    },
   })
 end
 
 -- format on save (handled by stevearc/conform.nvim)
 -- vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
 
--- use two tabs
+-- use two spaces for a tab
 vim.cmd([[set tabstop=2]])
 vim.cmd([[set shiftwidth=2]])
 vim.cmd([[set expandtab]])
+
+-- ...but use eight for Makefiles
+vim.cmd([[autocmd FileType make setlocal shiftwidth=8 tabstop=8 noexpandtab]])
 
 -- show line numbers in insert mode and relative line numbers in other modes
 vim.cmd([[set number]])
@@ -441,6 +492,8 @@ require("lazy").setup({
         highlight = {
           -- enable syntax highlighting
           enable = true,
+          -- disable buggy syntax highlighting for help filetype (2024-06-22)
+          disable = { "vimdoc" },
           -- don't run vim's syntax highlighting at the same time
           additional_vim_regex_highlighting = false,
         },
@@ -473,6 +526,7 @@ require("lazy").setup({
         lua = { "stylua" },
         python = { "black" },
         c = { "clang-format" },
+        cpp = { "clang-format" },
       },
       format_on_save = {
         timeout_ms = 500,
@@ -529,5 +583,40 @@ require("lazy").setup({
     version = "*",
     dependencies = "nvim-tree/nvim-web-devicons",
     opts = {},
+  },
+  {
+    "mfussenegger/nvim-dap",
+    config = function()
+      local dap = require("dap")
+      dap.adapters.lldb = {
+        type = "executable",
+        command = vim.fn.exepath("lldb-dap"),
+        name = "lldb",
+      }
+    end,
+  },
+  {
+    "rcarriga/nvim-dap-ui",
+    dependencies = { "nfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
+    config = function()
+      local dap, dapui = require("dap"), require("dapui")
+      dapui.setup()
+      dap.listeners.before.attach.dapui_config = function()
+        vim.cmd("NvimTreeClose")
+        dapui.open({ reset = true })
+      end
+      dap.listeners.before.launch.dapui_config = function()
+        vim.cmd("NvimTreeClose")
+        dapui.open({ reset = true })
+      end
+      dap.listeners.before.event_terminated.dapui_config = function()
+        dapui.close()
+        vim.cmd("NvimTreeOpen")
+      end
+      dap.listeners.before.event_exited.dapui_config = function()
+        dapui.close()
+        vim.cmd("NvimTreeOpen")
+      end
+    end,
   },
 }, { install = { colorscheme = { colorscheme } } })
