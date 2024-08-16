@@ -48,6 +48,7 @@ int is_wsl(void)
 #define BRANCH_ICON  "\xee\x9c\xa5"
 #define WINDOWS_ICON "\xee\x98\xaa"
 #define GEAR_ICON    "\xf3\xb0\x92\x93"
+#define PYTHON_ICON  "\xee\x98\x86"
 
 #define C_WHITE     15
 #define C_GRAY      245
@@ -56,6 +57,7 @@ int is_wsl(void)
 #define C_PURPLE    69
 #define C_LIGHTBLUE 117
 #define C_LIGHTRED  196
+#define C_YELLOW    228
 
 #define SIFY(x) #x
 #define FG(x)   "\\[\x1b[38;5;" SIFY(x) "m\\]"
@@ -223,13 +225,21 @@ void print_msystem(void)
     short_msystem = "*";
   if (!short_msystem)
     return;
-  printf(FG(C_PURPLE) "%s" WINDOWS_ICON CLR SEP, short_msystem);
+  printf(FG(C_PURPLE) WINDOWS_ICON "%s" CLR SEP, short_msystem);
+}
+
+void print_venv(void)
+{
+  const char* venv = getenv("VIRTUAL_ENV_PROMPT");
+  if (!venv)
+    return;
+  printf(FG(C_YELLOW) PYTHON_ICON "%s" CLR SEP, short_fmt ? "" : venv);
 }
 
 void print_job_count(int job_count)
 {
   if (job_count)
-    printf(FG(C_PURPLE) "%i" GEAR_ICON CLR SEP, job_count);
+    printf(FG(C_PURPLE) GEAR_ICON "%i" CLR SEP, job_count);
 }
 
 void print_git_branch(void)
@@ -318,6 +328,7 @@ int main(int argc, const char* const* argv)
   get_dims();
   short_fmt = term_width < 80 || getenv("PROMPT_COMPACT");
   print_msystem();
+  print_venv();
   print_job_count(job_count);
   if (!short_fmt)
     print_login_hostname();

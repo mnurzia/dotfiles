@@ -78,14 +78,12 @@ alias gc="git commit"
 alias gs="git status"
 
 # editor modifications
-# if command -v nvim > /dev/null 2>&1
-# then
-#   alias nano="nvim"
-#   export EDITOR=nvim
-#   export GIT_EDITOR=nvim
-# fi
-
-export EDITOR=vim
+if command -v nvim > /dev/null 2>&1
+then
+  alias nano="nvim"
+  export EDITOR=nvim
+  export GIT_EDITOR=nvim
+fi
 
 # vscode integration
 alias vsc=code
@@ -118,7 +116,8 @@ notes() {
 }
 
 # git setup
-git config --global user.email "7797957+mnurzia@users.noreply.github.com"
+git config --global user.email "max@mmn.sh"
+git config --global user.name "Max Nurzia"
 
 # prompt setup
 PROMPT_COMMAND=_prompt
@@ -143,7 +142,9 @@ bman() (
       ;;
     esac
     MAN_TMP="$(mktemp)"
-    "$FILTER" <"$MAN_PAGE" | groff -t -e -mandoc -Tpdf >"$MAN_TMP"
+    (printf '.pl 612p\n.ll 720p\n.in 0.0i\n.po 0.5i\n'
+     "$FILTER" <"$MAN_PAGE") |
+       groff -t -e -mandoc -Tpdf -P-p612p,792p >"$MAN_TMP"
     firefox "$MAN_TMP"
     sleep 0.5
     rm -f "$MAN_TMP"

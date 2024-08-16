@@ -20,7 +20,7 @@ local function keys()
   local wk = require("which-key")
 
   local function fkey(key)
-    local mods, snum = string.match("<S-F5>", "<([CS]*)-F(%d+)>")
+    local mods, snum = string.match(key, "<([CS]*)-F(%d+)>")
     local num = tonumber(snum)
     if string.find(mods, "S") then
       num = num + 12
@@ -52,7 +52,7 @@ local function keys()
     },
     ["<F2>"] = {
       function()
-        require("renamer").rename()
+        require("renamer").rename({})
       end,
       "LSP: Rename",
     },
@@ -84,6 +84,10 @@ local function keys()
       "<cmd>Telescope lsp_document_symbols<cr>",
       "LSP: Workspace Symbols...",
     },
+    [fkey("<S-F4>")] = {
+      "<cmd>Telescope find_files<cr>",
+      "Open file...",
+    },
     ["<F5>"] = {
       function()
         require("dap").continue()
@@ -101,6 +105,15 @@ local function keys()
         require("dap").toggle_breakpoint()
       end,
       "DAP: Toggle Breakpoint",
+    },
+    ["<F9>"] = {
+      function()
+        local dap = require("dap")
+        dap.toggle_breakpoint()
+        dap.continue()
+        dap.toggle_breakpoint()
+      end,
+      "DAP: Run To Cursor",
     },
     ["<F10>"] = {
       function()
@@ -254,6 +267,18 @@ require("lazy").setup({
     "onsails/lspkind.nvim",
   },
   {
+    -- lazily update workspace libraries, makes completion better
+    "folke/lazydev.nvim",
+    ft = "lua", -- only load on lua files
+    opts = {
+      library = {
+        -- See the configuration section for more details
+        -- Load luvit types when the `vim.uv` word is found
+        { path = "luvit-meta/library", words = { "vim%.uv" } },
+      },
+    },
+  },
+  {
     -- code completion and suggestions
     "hrsh7th/nvim-cmp",
     dependencies = {
@@ -292,7 +317,6 @@ require("lazy").setup({
               fallback()
             end
           end),
-
           ["<Tab>"] = cmp.mapping(
             function(fallback) -- use tab to move thru snippet
               if cmp.visible() then
@@ -320,6 +344,7 @@ require("lazy").setup({
           ),
         }),
         sources = cmp.config.sources({
+          { name = "lazydev", group_index = 0 }, -- provide workspace lib completions
           { name = "nvim_lsp" }, -- provide lsp completions
           { name = "luasnip" }, -- provide luasnip completions
           { name = "nvim_lsp_signature_help" }, -- show signature help
@@ -327,6 +352,8 @@ require("lazy").setup({
           { name = "buffer" }, -- buffer completions have lower priority
         }),
         formatting = {
+          fields = { "abbr", "kind", "menu" },
+          expandable_indicator = true,
           format = lspkind.cmp_format({ -- use lspkind to add nice symbol icons
             mode = "symbol",
             maxwidth = 50,
@@ -497,6 +524,8 @@ require("lazy").setup({
           -- don't run vim's syntax highlighting at the same time
           additional_vim_regex_highlighting = false,
         },
+        ignore_install = {},
+        modules = {},
       })
     end,
   },
@@ -559,6 +588,9 @@ require("lazy").setup({
   {
     "filipdutescu/renamer.nvim",
     opts = {},
+    dependencies = {
+      "neovim/nvim-lspconfig",
+    },
   },
   {
     "tris203/precognition.nvim",
@@ -597,7 +629,7 @@ require("lazy").setup({
   },
   {
     "rcarriga/nvim-dap-ui",
-    dependencies = { "nfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
+    dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
     config = function()
       local dap, dapui = require("dap"), require("dapui")
       dapui.setup()
@@ -617,6 +649,17 @@ require("lazy").setup({
         dapui.close()
         vim.cmd("NvimTreeOpen")
       end
+    end,
+  },
+  {
+    -- surround blocks of code with (){}[] etc
+    "kylechui/nvim-surround",
+    version = "*", -- Use for stability; omit to use `main` branch for the latest features
+    event = "VeryLazy",
+    config = function()
+      require("nvim-surround").setup({
+        -- Configuration here, or leave empty to use defaults
+      })
     end,
   },
 }, { install = { colorscheme = { colorscheme } } })

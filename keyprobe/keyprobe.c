@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 // Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 // See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
@@ -35,7 +36,8 @@ static const uint8_t utf8d[] = {
     12, 12, 36, 12, 36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 36, 12, 36, 12, 12,
     12, 36, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12};
 
-uint32_t utf_decode(uint32_t *state, uint32_t *codep, uint32_t byte) {
+uint32_t utf_decode(uint32_t* state, uint32_t* codep, uint32_t byte)
+{
   uint32_t type = utf8d[byte];
 
   *codep = (*state != UTF8_ACCEPT) ? (byte & 0x3fu) | (*codep << 6)
@@ -45,7 +47,7 @@ uint32_t utf_decode(uint32_t *state, uint32_t *codep, uint32_t byte) {
   return *state;
 }
 
-char *names[128] = {
+char* names[128] = {
     "NULL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS",  "HT",
     "LF",   "VT",  "FF",  "CR",  "SO",  "SI",  "DLE", "DC1", "DC2", "DC3",
     "DC4",  "NAK", "SYN", "ETB", "CAN", "EM",  "SUB", "ESC", "FS",  "GS",
@@ -68,19 +70,22 @@ struct termios orig_termios;
 #include <windows.h>
 #endif
 
-void cleanup(void) {
+void cleanup(void)
+{
   printf("\x1b[?1000l\x1b[?1002l\x1b[?1015l\x1b[?1006l\n");
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
 
-void sig(int s) {
+void sig(int s)
+{
   if (s == SIGINT || s == SIGQUIT) {
     cleanup();
     exit(0);
   }
 }
 
-int main(void) {
+int main(void)
+{
 #ifdef PLAT_UNIX
   struct termios raw;
   tcgetattr(STDIN_FILENO, &orig_termios);
@@ -126,24 +131,22 @@ int main(void) {
   signal(SIGQUIT, sig);
   atexit(&cleanup);
   int c = 0;
-  uint32_t codepoint;
-  uint32_t state = 0;
+  struct timespec start = {0};
+  clock_gettime(CLOCK_REALTIME, &start);
+  uint8_t buf[32];
+  uint32_t buf_pos = 0;
   while (fread(&c, 1, 1, stdin) == 1 && c != 0x03) {
-    if (c == 0x02) {
-      printf("\x05");
-    } else if (c < 0x80) {
-      printf("%02X - ('%s')", c, names[c]);
-    } else if (c >= 0xC0 && c < 0xF8) {
-      printf("%02X - (utf start)", c);
-    } else if (c < 0xF8) {
-      printf("%02X - (utf continuation)", c);
-    } else {
-      printf("%X ", c);
-    }
-    if (!utf_decode(&state, &codepoint, c & 0xFF)) {
-      printf(" - U+%X\r\n", codepoint);
-    } else {
+    struct timespec end = {0};
+    clock_gettime(CLOCK_REALTIME, &end);
+    int64_t diff = (end.tv_sec * 1000000000 + end.tv_nsec) -
+                   (start.tv_sec * 1000000000 + start.tv_nsec);
+    if (diff > 10 * 1000000 || buf_pos == sizeof(buf)) {
+      for (uint32_t i = 0; i < buf_pos; i++)
+        printf("%02X ", buf[i]);
       printf("\r\n");
+      buf_pos = 0;
     }
+    buf[buf_pos++] = c;
+    start = end;
   }
 }
