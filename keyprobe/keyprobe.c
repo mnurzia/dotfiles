@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 // Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 // See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
@@ -131,22 +130,24 @@ int main(void)
   signal(SIGQUIT, sig);
   atexit(&cleanup);
   int c = 0;
-  struct timespec start = {0};
-  clock_gettime(CLOCK_REALTIME, &start);
-  uint8_t buf[32];
-  uint32_t buf_pos = 0;
+  uint32_t codepoint;
+  uint32_t state = 0;
   while (fread(&c, 1, 1, stdin) == 1 && c != 0x03) {
-    struct timespec end = {0};
-    clock_gettime(CLOCK_REALTIME, &end);
-    int64_t diff = (end.tv_sec * 1000000000 + end.tv_nsec) -
-                   (start.tv_sec * 1000000000 + start.tv_nsec);
-    if (diff > 10 * 1000000 || buf_pos == sizeof(buf)) {
-      for (uint32_t i = 0; i < buf_pos; i++)
-        printf("%02X ", buf[i]);
-      printf("\r\n");
-      buf_pos = 0;
+    if (c == 0x02) {
+      printf("\x05");
+    } else if (c < 0x80) {
+      printf("%02X - ('%s')", c, names[c]);
+    } else if (c >= 0xC0 && c < 0xF8) {
+      printf("%02X - (utf start)", c);
+    } else if (c < 0xF8) {
+      printf("%02X - (utf continuation)", c);
+    } else {
+      printf("%X ", c);
     }
-    buf[buf_pos++] = c;
-    start = end;
+    if (!utf_decode(&state, &codepoint, c & 0xFF)) {
+      printf(" - U+%X\r\n", codepoint);
+    } else {
+      printf("\r\n");
+    }
   }
 }
