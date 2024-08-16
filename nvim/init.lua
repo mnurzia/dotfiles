@@ -79,14 +79,18 @@ local function keys()
         end,
         "LSP: Code Action...",
       },
+      ["f"] = {
+        "<cmd>Telescope find_files<cr>",
+        "Find Files...",
+      },
+      ["g"] = {
+        "<cmd>Telescope live_grep<cr>",
+        "Live Grep...",
+      },
     },
     ["<F4>"] = {
       "<cmd>Telescope lsp_document_symbols<cr>",
       "LSP: Workspace Symbols...",
-    },
-    [fkey("<S-F4>")] = {
-      "<cmd>Telescope find_files<cr>",
-      "Open file...",
     },
     ["<F5>"] = {
       function()
@@ -550,18 +554,41 @@ require("lazy").setup({
   {
     -- formatter support
     "stevearc/conform.nvim",
-    opts = {
-      formatters_by_ft = {
-        lua = { "stylua" },
-        python = { "black" },
-        c = { "clang-format" },
-        cpp = { "clang-format" },
-      },
-      format_on_save = {
-        timeout_ms = 500,
-        lsp_fallback = true,
-      },
-    },
+    config = function()
+      require("conform").setup({
+        formatters_by_ft = {
+          lua = { "stylua" },
+          python = { "black" },
+          c = { "clang-format" },
+          cpp = { "clang-format" },
+        },
+        format_on_save = function(bufnr)
+          -- Taken from the "Recipes" page on github
+          -- Disable with a global or buffer-local variable
+          if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+            return
+          end
+          return { timeout_ms = 500, lsp_format = "fallback" }
+        end,
+      })
+      vim.api.nvim_create_user_command("FormatDisable", function(args)
+        if args.bang then
+          -- FormatDisable! will disable formatting just for this buffer
+          vim.b.disable_autoformat = true
+        else
+          vim.g.disable_autoformat = true
+        end
+      end, {
+        desc = "Disable autoformat-on-save",
+        bang = true,
+      })
+      vim.api.nvim_create_user_command("FormatEnable", function()
+        vim.b.disable_autoformat = false
+        vim.g.disable_autoformat = false
+      end, {
+        desc = "Re-enable autoformat-on-save",
+      })
+    end,
   },
   {
     -- show indentation level as a line
