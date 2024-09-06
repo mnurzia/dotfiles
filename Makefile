@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=--std=c89 -Wall -Wpedantic -Werror -Wextra -Wshadow -Iinclude -g
 
-all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/mfetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington bin/keyprobe bin/wgpro ~/.config/tmux ~/.config/nvim ~/.inputrc
+all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/mfetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington bin/keyprobe bin/wgpro bin/path_add ~/.config/tmux ~/.config/nvim ~/.inputrc
 
 bin:
 	mkdir -p bin
@@ -47,6 +47,9 @@ bin/wgpro: wgpro/wgpro.py
 	cp wgpro/wgpro.py bin/wgpro
 	chmod +x bin/wgpro
 
+bin/path_add: path_add/path_add.c
+	$(CC) $(CFLAGS) -std=c99 path_add/path_add.c include/aparse.c -o bin/path_add
+
 ~/.config/tmux: tmux/tmux.conf
 	ln -sfn "$$(realpath ./tmux)" $@
 
@@ -55,6 +58,10 @@ bin/wgpro: wgpro/wgpro.py
 
 ~/.inputrc: inputrc
 	ln -sfn "$$(realpath ./inputrc)" $@
+
+compile_commands.json:
+	$(MAKE) clean
+	bear -- $(MAKE) 
 
 clean:
 	rm -rf bin
