@@ -6,7 +6,7 @@ PASS_DIR=${PASS_DIR:-~/.password-store}
 NOTES_DIR=${NOTES_DIR:-~/Documents/notes}
 
 # install custom binaries into PATH
-$($DOTFILES_DIR/bin/path_add $DOTFILES_DIR/bin)
+eval "$("$DOTFILES_DIR/bin/path_add" "$DOTFILES_DIR/bin")"
 
 # reload/rebuild configuration
 alias reload='source $DOTFILES_DIR/source.sh'
@@ -72,8 +72,7 @@ alias gc="git commit"
 alias gs="git status"
 
 # editor modifications
-if command -v nvim > /dev/null 2>&1
-then
+if command -v nvim >/dev/null 2>&1; then
   alias nano="nvim"
   export EDITOR=nvim
   export GIT_EDITOR=nvim
@@ -136,9 +135,11 @@ bman() (
       ;;
     esac
     MAN_TMP="$(mktemp)"
-    (printf '.pl 612p\n.ll 720p\n.in 0.0i\n.po 0.5i\n'
-     "$FILTER" <"$MAN_PAGE") |
-       groff -t -e -mandoc -Tpdf -P-p612p,792p >"$MAN_TMP"
+    (
+      printf '.pl 612p\n.ll 720p\n.in 0.0i\n.po 0.5i\n'
+      "$FILTER" <"$MAN_PAGE"
+    ) |
+      groff -t -e -mandoc -Tpdf -P-p612p,792p >"$MAN_TMP"
     firefox "$MAN_TMP"
     sleep 0.5
     rm -f "$MAN_TMP"
