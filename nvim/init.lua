@@ -182,12 +182,12 @@ require("lazy").setup({
         desc = "lsp: Rename",
       },
       {
-        "<F3>r",
+        "<F3>d",
         "<cmd>Telescope lsp_definitions<cr>",
         desc = "lsp: Definitions...",
       },
       {
-        "<F3>d",
+        "<F3>r",
         "<cmd>Telescope lsp_references<cr>",
         desc = "lsp: References...",
       },
@@ -217,6 +217,13 @@ require("lazy").setup({
         "<F3>g",
         "<cmd>Telescope live_grep<cr>",
         desc = "Live Grep...",
+      },
+      {
+        "<F3>h",
+        function()
+          vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+        end,
+        desc = "lsp: Toggle Inlay Hints",
       },
       {
         "<F4>",
@@ -538,6 +545,11 @@ require("lazy").setup({
         },
       })
       lspconfig.cmake.setup({}) -- cmake-language-server (CMake)
+      lspconfig.pbls.setup({ -- pbls (protobuf)
+        capabilities = caps,
+      })
+      vim.cmd("highlight! LspInlayHint guibg=#303030")
+      vim.lsp.inlay_hint.enable(true)
     end,
   },
   {
@@ -889,5 +901,10 @@ require("lazy").setup({
     "folke/trouble.nvim",
     opts = {},
     cmd = "Trouble",
+  },
+  {
+    "NStefan002/2048.nvim",
+    cmd = "Play2048",
+    config = true,
   },
 }, { install = { colorscheme = { colorscheme } } })
