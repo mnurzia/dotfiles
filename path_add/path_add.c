@@ -33,7 +33,7 @@ int main(int argc, const char* const* argv)
     ret = 1;
     goto error;
   }
-  printf("export PATH=\"");
+  printf("export PATH=");
   part = env_var_contents;
   while (part && *part != '\0') {
     part_next = strchr(part, ':');
@@ -46,7 +46,7 @@ int main(int argc, const char* const* argv)
   }
   printf("%s:", part_new);
 done:
-  printf("%s\"", env_var_contents);
+  printf("%s", env_var_contents);
 error:
   ap_destroy(par);
   return ret;

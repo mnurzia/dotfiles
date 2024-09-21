@@ -1,5 +1,15 @@
 $include /etc/inputrc
+
+# vi keybindings
 set editing-mode vi
 set show-mode-in-prompt on
+
+# change cursor style when switching modes
 set vi-ins-mode-string \1\e[6 q\2
 set vi-cmd-mode-string \1\e[2 q\2
+
+# 10ms escape-time
+set keyseq-timeout 10
+
+# don't append trailing slash to completed directories
+set mark-directories off
