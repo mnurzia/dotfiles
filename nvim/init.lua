@@ -4,14 +4,14 @@ local colorscheme = "vscode"
 -- bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
-	vim.fn.system({
-		"git",
-		"clone",
-		"--filter=blob:none",
-		"https://github.com/folke/lazy.nvim.git",
-		"--branch=stable", -- latest stable release
-		lazypath,
-	})
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
 end
 vim.opt.rtp:prepend(lazypath)
 
@@ -42,7 +42,9 @@ vim.cmd([[set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+]])
 
 -- ...but use eight for Makefiles
 vim.cmd([[autocmd FileType make setlocal shiftwidth=8 tabstop=8 noexpandtab]])
-vim.cmd([[autocmd FileType kconfig setlocal shiftwidth=8 tabstop=8 noexpandtab]])
+vim.cmd(
+  [[autocmd FileType kconfig setlocal shiftwidth=8 tabstop=8 noexpandtab]]
+)
 
 -- show line numbers in insert mode and relative line numbers in other modes
 vim.cmd([[set number]])
@@ -70,19 +72,19 @@ vim.g.python3_host_prog = "~/.pyenv/shims/python3"
 vim.diagnostic.config({ update_in_insert = true })
 
 require("lazy").setup({
-	{
-		-- simple profiler (run nvim with NVIM_PROFILE=1)
-		"stevearc/profile.nvim",
-		config = function()
-			local should_profile = os.getenv("NVIM_PROFILE")
-			if should_profile then
-				require("profile").instrument_autocmds()
-				if should_profile:lower():match("^start") then
-					require("profile").start("*")
-				else
-					require("profile").instrument("*")
-				end
-			end
+  {
+    -- simple profiler (run nvim with NVIM_PROFILE=1)
+    "stevearc/profile.nvim",
+    config = function()
+      local should_profile = os.getenv("NVIM_PROFILE")
+      if should_profile then
+        require("profile").instrument_autocmds()
+        if should_profile:lower():match("^start") then
+          require("profile").start("*")
+        else
+          require("profile").instrument("*")
+        end
+      end
 
       local function toggle_profile()
         local prof = require("profile")
@@ -394,12 +396,13 @@ require("lazy").setup({
       local cmp = require("cmp")
       local luasnip = require("luasnip")
       local lspkind = require("lspkind")
-      local lspkind_fmt_func = lspkind.cmp_format({ -- use lspkind to add nice symbol icons
-        mode = "symbol",
-        maxwidth = 50,
-        ellipsis_char = "...",
-        show_labelDetails = true,
-      })
+      local lspkind_fmt_func =
+        lspkind.cmp_format({ -- use lspkind to add nice symbol icons
+          mode = "symbol",
+          maxwidth = 50,
+          ellipsis_char = "...",
+          show_labelDetails = true,
+        })
       -- set completeopt for nvim-cmp
       vim.opt.completeopt = { "menu", "menuone", "noselect" }
       cmp.setup({
@@ -427,32 +430,41 @@ require("lazy").setup({
               fallback()
             end
           end),
-          ["<Tab>"] = cmp.mapping(function(fallback) -- use tab to move thru snippet
-            if cmp.visible() then
-              cmp.select_next_item()
-            elseif luasnip.locally_jumpable(1) then
-              luasnip.jump(1)
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
+          ["<Tab>"] = cmp.mapping(
+            function(fallback) -- use tab to move thru snippet
+              if cmp.visible() then
+                cmp.select_next_item()
+              elseif luasnip.locally_jumpable(1) then
+                luasnip.jump(1)
+              else
+                fallback()
+              end
+            end,
+            { "i", "s" }
+          ),
 
-          ["<S-Tab>"] = cmp.mapping(function(fallback) -- use shift-tab to move back thru snippet
-            if cmp.visible() then
-              cmp.select_prev_item()
-            elseif luasnip.locally_jumpable(-1) then
-              luasnip.jump(-1)
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
+          ["<S-Tab>"] = cmp.mapping(
+            function(fallback) -- use shift-tab to move back thru snippet
+              if cmp.visible() then
+                cmp.select_prev_item()
+              elseif luasnip.locally_jumpable(-1) then
+                luasnip.jump(-1)
+              else
+                fallback()
+              end
+            end,
+            { "i", "s" }
+          ),
         }),
         sources = cmp.config.sources({
           { name = "lazydev" }, -- provide workspace lib completions
         }, {
           { name = "nvim_lua" },
         }, {
-          { name = "luasnip", option = { use_show_condition = false, show_autosnippets = true } },
+          {
+            name = "luasnip",
+            option = { use_show_condition = false, show_autosnippets = true },
+          },
         }, {
           { name = "nvim_lsp_signature_help" },
         }, {
@@ -496,29 +508,33 @@ require("lazy").setup({
       lspconfig.lua_ls.setup({ -- lua_ls (Lua)
         on_init = function(client)
           local path = client.workspace_folders[1].name
-          if vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc") then
+          if
+            vim.loop.fs_stat(path .. "/.luarc.json")
+            or vim.loop.fs_stat(path .. "/.luarc.jsonc")
+          then
             return
           end
 
-          client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
-            runtime = {
-              -- Tell the language server which version of Lua you're using
-              -- (most likely LuaJIT in the case of Neovim)
-              version = "LuaJIT",
-            },
-            -- Make the server aware of Neovim runtime files
-            workspace = {
-              checkThirdParty = false,
-              library = {
-                vim.env.VIMRUNTIME,
-                -- Depending on the usage, you might want to add additional paths here.
-                "${3rd}/luv/library",
-                -- "${3rd}/busted/library",
+          client.config.settings.Lua =
+            vim.tbl_deep_extend("force", client.config.settings.Lua, {
+              runtime = {
+                -- Tell the language server which version of Lua you're using
+                -- (most likely LuaJIT in the case of Neovim)
+                version = "LuaJIT",
               },
-              -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
-              -- library = vim.api.nvim_get_runtime_file("", true)
-            },
-          })
+              -- Make the server aware of Neovim runtime files
+              workspace = {
+                checkThirdParty = false,
+                library = {
+                  vim.env.VIMRUNTIME,
+                  -- Depending on the usage, you might want to add additional paths here.
+                  "${3rd}/luv/library",
+                  -- "${3rd}/busted/library",
+                },
+                -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
+                -- library = vim.api.nvim_get_runtime_file("", true)
+              },
+            })
         end,
         capabilities = caps,
         settings = {
@@ -636,7 +652,8 @@ require("lazy").setup({
           :with_cr(cond.none())
           :with_del(function(opts)
             local col = vim.api.nvim_win_get_cursor(0)[2]
-            return a1 .. ins .. ins .. a2 == opts.line:sub(col - #a1 - #ins + 1, col + #ins + #a2) -- insert only works for #ins == 1 anyway
+            return a1 .. ins .. ins .. a2
+              == opts.line:sub(col - #a1 - #ins + 1, col + #ins + #a2) -- insert only works for #ins == 1 anyway
           end))
       end
       rule2("/", "*", "/", { "c", "cpp" })
