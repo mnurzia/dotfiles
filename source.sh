@@ -6,7 +6,7 @@ PASS_DIR=${PASS_DIR:-~/.password-store}
 NOTES_DIR=${NOTES_DIR:-~/Documents/notes}
 
 # install custom binaries into PATH
-eval "$("$DOTFILES_DIR/bin/path_add" "$DOTFILES_DIR/bin")"
+$($DOTFILES_DIR/bin/path_add $DOTFILES_DIR/bin)
 
 # reload/rebuild configuration
 alias reload='source $DOTFILES_DIR/source.sh'
