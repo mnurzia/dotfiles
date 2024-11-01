@@ -5,8 +5,19 @@ DOTFILES_DIR=${DOTFILES_DIR:-~/.config/dotfiles}
 PASS_DIR=${PASS_DIR:-~/.password-store}
 NOTES_DIR=${NOTES_DIR:-~/Documents/notes}
 
+path_add() {
+  # https://unix.stackexchange.com/a/217629
+  if ! echo "$PATH" | /bin/grep -Eq "(^|:)$1($|:)"; then
+    if [ "$2" = "after" ]; then
+      PATH="$PATH:$1"
+    else
+      PATH="$1:$PATH"
+    fi
+  fi
+}
+
 # install custom binaries into PATH
-eval "$("$DOTFILES_DIR/bin/path_add" "$DOTFILES_DIR/bin")"
+path_add "$DOTFILES_DIR/bin"
 
 # reload/rebuild configuration
 alias reload='source $DOTFILES_DIR/source.sh'
@@ -73,7 +84,6 @@ alias gs="git status"
 
 # editor modifications
 if command -v nvim >/dev/null 2>&1; then
-  alias nano="nvim"
   export EDITOR=nvim
   export GIT_EDITOR=nvim
 fi
@@ -105,7 +115,11 @@ alias passshow=passhow
 
 # note taking
 notes() {
-  $EDITOR "$(find "$NOTES_PATH" -mindepth 1 -maxdepth 1 | fzf)"
+  $EDITOR "$(find "$NOTES_DIR" -mindepth 1 -maxdepth 1 | fzf)"
+}
+
+todo() {
+  $EDITOR "$NOTES_DIR/TODO.txt"
 }
 
 # git setup
@@ -139,6 +153,8 @@ bman() (
       printf '.pl 612p\n.ll 720p\n.in 0.0i\n.po 0.5i\n'
       "$FILTER" <"$MAN_PAGE"
     ) |
+      # note: basic groff installations will fail here because they don't have pdf
+      # drivers-- on Ubuntu, `sudo apt install groff` will fix this
       groff -t -e -mandoc -Tpdf -P-p612p,792p >"$MAN_TMP"
     firefox "$MAN_TMP"
     sleep 0.5

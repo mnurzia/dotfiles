@@ -1,0 +1,52 @@
+live_config_reload = true
+
+# Colors (Wombat -- https://github.com/alacritty/alacritty-theme/blob/master/themes/wombat.toml)
+
+# Default colors
+[colors.primary]
+background = '#000000' # original: '#1f1f1f'
+foreground = '#e5e1d8'
+
+# Normal colors
+[colors.normal]
+black   = '#000000'
+red     = '#f7786d'
+green   = '#bde97c'
+yellow  = '#efdfac'
+blue    = '#6ebaf8'
+magenta = '#ef88ff'
+cyan    = '#90fdf8'
+white   = '#e5e1d8'
+
+# Bright colors
+[colors.bright]
+black   = '#b4b4b4'
+red     = '#f99f92'
+green   = '#e3f7a1'
+yellow  = '#f2e9bf'
+blue    = '#b3d2ff'
+magenta = '#e5bdff'
+cyan    = '#c2fefa'
+white   = '#ffffff'
+
+[font]
+size = 9
+# offset = { y = -2 }
+# glyph_offset = { y = -1 }
+
+[font.normal]
+family = "CtrlD"
+
+[keyboard]
+bindings = [
+  { key = "=", mods = "Super", action = "IncreaseFontSize" },
+  { key = "-", mods = "Super", action = "DecreaseFontSize" },
+  { key = "N", mods = "Super", action = "CreateNewWindow" },
+  { key = "Q", mods = "Super", action = "ClearLogNotice"},
+]
+
+[shell]
+program = "/usr/bin/tmux"
+
+[env]
+PROMPT_USER_COLORS = "120"
