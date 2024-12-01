@@ -717,8 +717,6 @@ int ap_arg_error(ap_cb_data *cbd, const char *error_string) {
   int err;
   ap *par = cbd->parser;
   ap_arg *arg = cbd->reserved;
-  /* if this fails, you tried to call ap_arg_error from a destructor callback */
-  assert(!arg || cbd->destroy);
   if ((err = ap_error_prefix(par)) || (err = ap_err(par, "argument ")) ||
       (err = ap_show_argspec(par, arg, ap_err, 0)) ||
       (err = ap_err(par, ": ")) || (err = ap_err(par, error_string)) ||

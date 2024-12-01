@@ -8,7 +8,9 @@ typedef struct prec {
 } prec;
 
 #define PRECDEF(l, o, n)                                                       \
-  { l, o, n } /* gives us better formatting w/ clang format */
+  {                                                                            \
+    l, o, n                                                                    \
+  } /* gives us better formatting w/ clang format */
 
 const prec PREC[] = {
     PRECDEF(1, "++x --x", "prefix incr/decr"),
@@ -45,10 +47,11 @@ const prec PREC[] = {
 
 #define CSI "\x1b["
 
-const char *format_op(const prec *pp, int width) {
-  const char *in = pp->op;
-  char *out = malloc(width * 8);
-  char *p = out;
+const char* format_op(const prec* pp, int width)
+{
+  const char* in = pp->op;
+  char* out = malloc(width * 8);
+  char* p = out;
   int color = -1, i = 0;
   for (; i < width; i++) {
     int next_color = color;
@@ -65,7 +68,8 @@ const char *format_op(const prec *pp, int width) {
   return out;
 }
 
-int main(void) {
+int main(void)
+{
   const prec *p, *p2;
   int nprec = (sizeof(PREC) / sizeof(prec));
   for (p = PREC, p2 = PREC + nprec / 2; p < PREC + nprec / 2; p++, p2++) {

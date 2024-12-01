@@ -1,6 +1,7 @@
 return {
   -- quickly jump around using keys
   "folke/flash.nvim",
+  event = "VeryLazy",
   dependencies = {
     "nvim-treesitter/nvim-treesitter",
   },

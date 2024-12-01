@@ -29,7 +29,11 @@ class Cfg(ConfigParser):
                 return value
 
         super().__init__(interpolation=CfgInterpolation())
-        self.optionxform = str
+
+        def optionxform(optionstr: str) -> str:
+            return optionstr
+
+        self.optionxform = optionxform
         self.read_file(self._file)
 
     def get_ranges(self) -> list[IPv4Network | IPv6Network]:
@@ -43,9 +47,7 @@ class Cfg(ConfigParser):
                 continue
             yield section_name.split(".")[1]
 
-    def save(self, output_file: IO = None):
-        if not output_file:
-            output_file = self._file
+    def save(self, output_file: IO):
         output_file.seek(0)
         output_file.truncate(0)
         for i, section in enumerate(self.sections()):
@@ -56,8 +58,11 @@ class Cfg(ConfigParser):
                 output_file.write(f"{key}={value}\n")
         output_file.flush()
 
+    def sync(self):
+        self.save(self._file)
 
-def cmd_list(parser: ArgumentParser, args: Namespace) -> int:
+
+def cmd_list(_: ArgumentParser, args: Namespace) -> int:
     cfg = Cfg(args.config)
     for peer in cfg.get_peers():
         print(f"{peer}")
@@ -103,7 +108,7 @@ def cmd_add(parser: ArgumentParser, args: Namespace) -> int:
             template_cfg = Cfg(template_file, interp=interpolations)
         with open(clients_path / template.name, "w") as client_file:
             template_cfg.save(client_file)
-    cfg.save()
+    cfg.sync()
     return 0
 
 
@@ -112,7 +117,7 @@ def cmd_remove(parser: ArgumentParser, args: Namespace) -> int:
     if args.name not in cfg.get_peers():
         parser.error(f"peer {args.name} does not exist")
     cfg.remove_section(f"Peer.{args.name}")
-    cfg.save()
+    cfg.sync()
     if args.hard:
         rmtree(Path(cfg.get("Config", "ClientsDir")) / args.name)
     return 0
@@ -129,7 +134,7 @@ def cmd_conf(parser: ArgumentParser, args: Namespace) -> int:
     return 0
 
 
-def main(args: list[str]) -> int:
+def main(argv: list[str]) -> int:
     parser = ArgumentParser()
     parser.add_argument("-c", "--config", type=FileType("r+"), default="wgpro.cfg")
     subs = parser.add_subparsers(required=True)
@@ -153,7 +158,7 @@ def main(args: list[str]) -> int:
     )
     parser_conf.set_defaults(cmd=cmd_conf)
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     return args.cmd(parser, args)
 
 

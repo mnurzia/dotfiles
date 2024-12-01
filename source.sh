@@ -126,13 +126,26 @@ todo() {
 git config --global user.email "max@mmn.sh"
 git config --global user.name "Max Nurzia"
 
-# prompt setup
-PROMPT_COMMAND=_prompt
-_prompt() {
-  _PROMPT_EXIT_STATUS=$?
-  history -a
-  PS1="$("$DOTFILES_DIR"/bin/prompt -x $_PROMPT_EXIT_STATUS -j "$(jobs | wc -l)")"
-}
+# per-shell prompt/completion setup
+case "$($(which ps) -p $$ -o cmd=)" in
+*bash)
+  PROMPT_COMMAND=_prompt
+  _prompt() {
+    _PROMPT_EXIT_STATUS=$?
+    history -a
+    PS1="$("$DOTFILES_DIR"/bin/prompt -x $_PROMPT_EXIT_STATUS -j "$(jobs | wc -l)" -s bash)"
+  }
+  # tmux completion support
+  TMUX_COMPLETION=$DOTFILES_DIR/tmux/tmux-bash-completion/completions/tmux
+  if test -e "$TMUX_COMPLETION"; then
+    # shellcheck source=tmux/tmux-bash-completion/completions/tmux
+    . "$TMUX_COMPLETION"
+  fi
+  ;;
+*zsh)
+  source $DOTFILES_DIR/source.zsh
+  ;;
+esac
 
 # pythonrc
 export PYTHONSTARTUP="$DOTFILES_DIR/pythonrc"
@@ -161,13 +174,6 @@ bman() (
     rm -f "$MAN_TMP"
   fi
 )
-
-# tmux completion support
-TMUX_COMPLETION=$DOTFILES_DIR/tmux/tmux-bash-completion/completions/tmux
-if test -e "$TMUX_COMPLETION"; then
-  # shellcheck source=tmux/tmux-bash-completion/completions/tmux
-  . "$TMUX_COMPLETION"
-fi
 
 # signifies correct loading
 mfetch
