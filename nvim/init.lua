@@ -2,6 +2,7 @@
 vim.cmd([[set tabstop=2]])
 vim.cmd([[set shiftwidth=2]])
 vim.cmd([[set expandtab]])
+vim.cmd([[let no_ocaml_maps=1]])
 
 -- show tab characters and trailing spaces
 vim.cmd([[set list]])
@@ -9,7 +10,9 @@ vim.cmd([[set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+]])
 
 -- ...but use eight for Makefiles
 vim.cmd([[autocmd FileType make setlocal shiftwidth=8 tabstop=8 noexpandtab]])
-vim.cmd([[autocmd FileType kconfig setlocal shiftwidth=8 tabstop=8 noexpandtab]])
+vim.cmd(
+  [[autocmd FileType kconfig setlocal shiftwidth=8 tabstop=8 noexpandtab]]
+)
 
 -- show line numbers in insert mode and relative line numbers in other modes
 vim.cmd([[set number]])

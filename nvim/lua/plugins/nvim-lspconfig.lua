@@ -12,29 +12,33 @@ return {
     lspconfig.lua_ls.setup({ -- lua_ls (Lua)
       on_init = function(client)
         local path = client.workspace_folders[1].name
-        if vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc") then
+        if
+          vim.loop.fs_stat(path .. "/.luarc.json")
+          or vim.loop.fs_stat(path .. "/.luarc.jsonc")
+        then
           return
         end
 
-        client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
-          runtime = {
-            -- Tell the language server which version of Lua you're using
-            -- (most likely LuaJIT in the case of Neovim)
-            version = "LuaJIT",
-          },
-          -- Make the server aware of Neovim runtime files
-          workspace = {
-            checkThirdParty = false,
-            library = {
-              vim.env.VIMRUNTIME,
-              -- Depending on the usage, you might want to add additional paths here.
-              "${3rd}/luv/library",
-              -- "${3rd}/busted/library",
+        client.config.settings.Lua =
+          vim.tbl_deep_extend("force", client.config.settings.Lua, {
+            runtime = {
+              -- Tell the language server which version of Lua you're using
+              -- (most likely LuaJIT in the case of Neovim)
+              version = "LuaJIT",
             },
-            -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
-            -- library = vim.api.nvim_get_runtime_file("", true)
-          },
-        })
+            -- Make the server aware of Neovim runtime files
+            workspace = {
+              checkThirdParty = false,
+              library = {
+                vim.env.VIMRUNTIME,
+                -- Depending on the usage, you might want to add additional paths here.
+                "${3rd}/luv/library",
+                -- "${3rd}/busted/library",
+              },
+              -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
+              -- library = vim.api.nvim_get_runtime_file("", true)
+            },
+          })
       end,
       capabilities = caps,
       settings = {
@@ -64,8 +68,21 @@ return {
     lspconfig.pbls.setup({ -- pbls (protobuf)
       capabilities = caps,
     })
+    lspconfig.ocamllsp.setup({ capabilities = caps }) -- ocaml-lsp (OCaml)
     vim.cmd("highlight! LspInlayHint guibg=#303030")
     vim.lsp.inlay_hint.enable(true)
+    for _, method in ipairs({
+      "textDocument/diagnostic",
+      "workspace/diagnostic",
+    }) do
+      local default_diagnostic_handler = vim.lsp.handlers[method]
+      vim.lsp.handlers[method] = function(err, result, context, config)
+        if err ~= nil and err.code == -32802 then
+          return
+        end
+        return default_diagnostic_handler(err, result, context, config)
+      end
+    end
   end,
   keys = {
     {

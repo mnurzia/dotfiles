@@ -80,7 +80,7 @@ randport() {
 alias gp="git push"
 alias ga="git add"
 alias gc="git commit"
-alias gs="git status"
+alias gs="git status -s"
 
 # editor modifications
 if command -v nvim >/dev/null 2>&1; then
@@ -128,7 +128,7 @@ git config --global user.name "Max Nurzia"
 
 # per-shell prompt/completion setup
 case "$($(which ps) -p $$)" in
-*bash)
+*bash*)
 	PROMPT_COMMAND=_prompt
 	_prompt() {
 		_PROMPT_EXIT_STATUS=$?
@@ -142,7 +142,7 @@ case "$($(which ps) -p $$)" in
 		. "$TMUX_COMPLETION"
 	fi
 	;;
-*zsh)
+*zsh*)
 	source $DOTFILES_DIR/source.zsh
 	;;
 esac

@@ -9,6 +9,9 @@ return {
         c = { "clang-format" },
         cpp = { "clang-format" },
         sh = { "shfmt" },
+        ocaml = { "ocamlformat" },
+        markdown = { "mdformat" },
+        html = { "superhtml" },
       },
       default_format_opts = {
         lsp_format = "fallback",

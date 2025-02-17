@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=--std=c89 -Wall -Wpedantic -Werror -Wextra -Wshadow -Iinclude -g
 LN=ln -sfn
 
-all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/mfetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington bin/keyprobe bin/wgpro bin/fingers ~/.config/tmux ~/.config/nvim ~/.inputrc ~/.config/gdb/gdbinit ~/.config/alacritty.toml
+all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/mfetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington bin/keyprobe bin/wgpro bin/fingers ~/.config/tmux ~/.config/nvim ~/.inputrc ~/.config/gdb/gdbinit ~/.config/alacritty.toml ~/.config/ghostty/config
 
 bin:
 	mkdir -p bin
@@ -66,6 +66,10 @@ bin/fingers: fingers.c
 
 ~/.config/alacritty.toml: alacritty.toml
 	$(LN) "$$(realpath ./alacritty.toml)" $@
+
+~/.config/ghostty/config: ghostty/config
+	mkdir -p ~/.config/ghostty
+	$(LN) "$$(realpath ghostty/config)" $@
 
 compile_commands.json:
 	$(MAKE) clean

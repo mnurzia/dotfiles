@@ -16,12 +16,13 @@ return {
     local cmp = require("cmp")
     local luasnip = require("luasnip")
     local lspkind = require("lspkind")
-    local lspkind_fmt_func = lspkind.cmp_format({ -- use lspkind to add nice symbol icons
-      mode = "symbol",
-      maxwidth = 50,
-      ellipsis_char = "...",
-      show_labelDetails = true,
-    })
+    local lspkind_fmt_func =
+      lspkind.cmp_format({ -- use lspkind to add nice symbol icons
+        mode = "symbol",
+        maxwidth = 50,
+        ellipsis_char = "...",
+        show_labelDetails = true,
+      })
     -- set completeopt for nvim-cmp
     vim.opt.completeopt = { "menu", "menuone", "noselect" }
     cmp.setup({
@@ -49,47 +50,62 @@ return {
             fallback()
           end
         end),
-        ["<Tab>"] = cmp.mapping(function(fallback) -- use tab to move thru snippet
-          if cmp.visible() then
-            cmp.select_next_item()
-          elseif luasnip.locally_jumpable(1) then
-            luasnip.jump(1)
-          else
-            fallback()
-          end
-        end, { "i", "s" }),
+        ["<Tab>"] = cmp.mapping(
+          function(fallback) -- use tab to move thru snippet
+            if cmp.visible() then
+              cmp.select_next_item()
+            elseif luasnip.locally_jumpable(1) then
+              luasnip.jump(1)
+            else
+              fallback()
+            end
+          end,
+          { "i", "s" }
+        ),
 
-        ["<S-Tab>"] = cmp.mapping(function(fallback) -- use shift-tab to move back thru snippet
-          if cmp.visible() then
-            cmp.select_prev_item()
-          elseif luasnip.locally_jumpable(-1) then
-            luasnip.jump(-1)
-          else
-            fallback()
-          end
-        end, { "i", "s" }),
+        ["<S-Tab>"] = cmp.mapping(
+          function(fallback) -- use shift-tab to move back thru snippet
+            if cmp.visible() then
+              cmp.select_prev_item()
+            elseif luasnip.locally_jumpable(-1) then
+              luasnip.jump(-1)
+            else
+              fallback()
+            end
+          end,
+          { "i", "s" }
+        ),
       }),
-      sources = cmp.config.sources({
-        { name = "lazydev" }, -- provide workspace lib completions
-      }, {
-        { name = "nvim_lua" },
-      }, {
+      sources = cmp.config.sources(
         {
-          name = "luasnip",
-          option = { use_show_condition = false, show_autosnippets = true },
+          { name = "lazydev" }, -- provide workspace lib completions
         },
-      }, {
-        { name = "nvim_lsp_signature_help" },
-      }, {
-        { name = "nvim_lsp" },
-      }, {
+        {
+          { name = "nvim_lua" },
+        },
+        {
+          {
+            name = "luasnip",
+            option = { use_show_condition = false, show_autosnippets = true },
+          },
+        },
+        {
+          { name = "nvim_lsp_signature_help" },
+        },
+        {
+          { name = "nvim_lsp" },
+        } --[[, {
         { name = "buffer" }, -- buffer completions have lower priority
-      }),
+      }--]]
+      ),
       formatting = {
         fields = { "abbr", "kind", "menu" },
         expandable_indicator = true,
         format = function(entry, vim_item)
           vim_item.menu = entry.source.name
+          if entry.source.name == "buffer" then
+            vim_item.abbr_hl_group = "NvimTreeGitIgnoredIcon"
+          end
           return lspkind_fmt_func(entry, vim_item)
         end,
       },
