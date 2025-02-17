@@ -7,3 +7,4 @@ command = tmux
 keybind = global:cmd+grave_accent=toggle_quick_terminal
 theme = "iTerm2 Dark Background"
 bold-is-bright = true
+config-file = ?~/.config/ghostty/custom_config
