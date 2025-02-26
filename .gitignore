@@ -4,3 +4,4 @@ nvim/lazy-lock.json
 compile_commands.json
 .cache
 TODO.txt
+__pycache__
