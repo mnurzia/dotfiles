@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=--std=c89 -Wall -Wpedantic -Werror -Wextra -Wshadow -Iinclude -g
 LN=ln -sfn
 
-all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/mfetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington bin/keyprobe bin/wgpro bin/fingers ~/.config/tmux ~/.config/nvim ~/.inputrc ~/.config/gdb/gdbinit ~/.config/alacritty.toml ~/.config/ghostty/config
+all: bin bin/prompt bin/colors bin/get_ip bin/get_ip6 bin/mfetch bin/name_weight bin/ascii bin/bviz bin/cprec bin/wordington bin/keyprobe bin/wgpro bin/fingers bin/pdir ~/.config/tmux ~/.config/nvim ~/.inputrc ~/.config/gdb/gdbinit ~/.config/alacritty.toml ~/.config/ghostty/config
 
 bin:
 	mkdir -p bin
@@ -50,6 +50,9 @@ bin/wgpro: wgpro/wgpro.py
 
 bin/fingers: fingers.c
 	$(CC) $(CFLAGS) fingers.c -o $@
+
+bin/pdir: pdir.c
+	$(CC) $(CFLAGS) pdir.c include/aparse.c -o $@
 
 ~/.config/tmux: tmux/tmux.conf
 	$(LN) "$$(realpath ./tmux)" $@

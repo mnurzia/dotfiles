@@ -4,3 +4,6 @@
 [submodule "tmux/--force"]
 	path = tmux/--force
 	url = https://github.com/imomaliev/tmux-bash-completion
+[submodule "z"]
+	path = z
+	url = https://github.com/rupa/z

@@ -143,7 +143,7 @@ case "$($(which ps) -p $$)" in
 	fi
 	;;
 *zsh*)
-	source $DOTFILES_DIR/source.zsh
+	source "$DOTFILES_DIR/source.zsh"
 	;;
 esac
 
@@ -174,6 +174,12 @@ bman() (
 		rm -f "$MAN_TMP"
 	fi
 )
+
+Z_SH=$DOTFILES_DIR/z/z.sh
+if test -e "$Z_SH"; then
+	# shellcheck source=z/z.sh
+	. "$Z_SH"
+fi
 
 # signifies correct loading
 mfetch
